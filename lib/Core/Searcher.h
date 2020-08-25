@@ -81,7 +81,8 @@ namespace klee {
       NURS_RP,
       NURS_ICnt,
       NURS_CPICnt,
-      NURS_QC
+      NURS_QC,
+      PARAM
     };
   };
 
@@ -325,6 +326,23 @@ namespace klee {
     }
   };
 
+  // PARAM_TODO: define argument for constructor
+  class ParameterizedSearcher : public Searcher {
+    std::vector<ExecutionState*> states;
+
+  public:
+    ParameterizedSearcher();
+    ~ParameterizedSearcher();
+
+    ExecutionState &selectState();
+    void update(ExecutionState *current,
+                const std::vector<ExecutionState*> &addedStates,
+                const std::vector<ExecutionState*> &removedStates);
+    bool empty() { return states.empty(); }
+    void printName(llvm::raw_ostream &os) {
+      os << "ParameterizedSearcher\n";
+    }
+  };
 }
 
 #endif /* KLEE_SEARCHER_H */

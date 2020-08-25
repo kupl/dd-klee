@@ -469,3 +469,19 @@ void InterleavedSearcher::update(
          ie = searchers.end(); it != ie; ++it)
     (*it)->update(current, addedStates, removedStates);
 }
+
+///
+
+// PARAM_TODO:implement class definition for ParameterizedSearcher
+ParameterizedSearcher::ParameterizedSearcher() {}
+ParameterizedSearcher::~ParameterizedSearcher() {}
+
+ExecutionState &ParameterizedSearcher::selectState() {
+
+}
+
+void ParameterizedSearcher::update(
+    ExecutionState *current,
+    const std::vector<ExecutionState *> &addedStates,
+    const std::vector<ExecutionState *> &removedStates) {
+}
