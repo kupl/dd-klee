@@ -329,6 +329,10 @@ namespace klee {
   // PARAM_TODO: define argument for constructor
   class ParameterizedSearcher : public Searcher {
     std::vector<ExecutionState*> states;
+    std::map<ExecutionState*, std::vector<double> > fvmap;
+
+    // PARAM_TODO: decide whether Executor object is needed as a member
+    // Executor &executor;
 
   public:
     ParameterizedSearcher(const std::string &weightFile);
