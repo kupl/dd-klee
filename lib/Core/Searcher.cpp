@@ -473,7 +473,7 @@ void InterleavedSearcher::update(
 ///
 
 // PARAM_TODO:implement class definition for ParameterizedSearcher
-ParameterizedSearcher::ParameterizedSearcher() {}
+ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) {}
 ParameterizedSearcher::~ParameterizedSearcher() {}
 
 ExecutionState &ParameterizedSearcher::selectState() {

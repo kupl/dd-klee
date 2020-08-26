@@ -331,7 +331,7 @@ namespace klee {
     std::vector<ExecutionState*> states;
 
   public:
-    ParameterizedSearcher();
+    ParameterizedSearcher(const std::string &weightFile);
     ~ParameterizedSearcher();
 
     ExecutionState &selectState();
