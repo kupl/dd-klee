@@ -326,7 +326,6 @@ namespace klee {
     }
   };
 
-  // PARAM_TODO: define argument for constructor
   class ParameterizedSearcher : public Searcher {
     std::vector<ExecutionState*> states;
     ExecutionState* top;
@@ -350,6 +349,10 @@ namespace klee {
     void printName(llvm::raw_ostream &os) {
       os << "ParameterizedSearcher\n";
     }
+
+    enum Feature {
+      // PARAM_TODO: fill out features
+    };
   };
 }
 

@@ -472,7 +472,9 @@ void InterleavedSearcher::update(
 
 ///
 
-// PARAM_TODO:implement class definition for ParameterizedSearcher
+// PARAM_TODO:
+// 1. define constructors
+// 2. feature extraction and score calculation
 ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) {}
 ParameterizedSearcher::~ParameterizedSearcher() {}
 
