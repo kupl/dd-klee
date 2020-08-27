@@ -2,7 +2,7 @@ KLEE-kupl (a temporary name)
 =============================
 
 ## Build KLEE
-We recommend to build our KLEE-kupl with LLVM 6.0. See [KLEE][klee].
+We recommend to build our KLEE-kupl with LLVM 6.0. See [KLEE](https://klee.github.io/releases/docs/v2.1/build-llvm60/).
 
 Build:
 ```sh
@@ -26,7 +26,3 @@ $ cmake \
    <KLEE-kupl_SRC_DIRECTORY>
 $ make
 ```
-
-
-
-[klee]:https://klee.github.io/releases/docs/v2.1/build-llvm60/)
