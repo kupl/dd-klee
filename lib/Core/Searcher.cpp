@@ -476,8 +476,18 @@ void InterleavedSearcher::update(
 ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) {}
 ParameterizedSearcher::~ParameterizedSearcher() {}
 
-ExecutionState &ParameterizedSearcher::selectState() {
+ParameterizedSearcher::fv_map_t 
+ParameterizedSearcher::extractFeatures(const std::vector<ExecutionState*> states) {
 
+}
+
+void ParameterizedSearcher::computeScores(ParameterizedSearcher::fv_map_t &fvmap) {
+
+}
+
+ExecutionState &ParameterizedSearcher::selectState() {
+  assert(top && "score has not been caclculated!");
+  return *top;
 }
 
 void ParameterizedSearcher::update(
