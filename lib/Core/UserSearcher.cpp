@@ -49,7 +49,7 @@ cl::list<Searcher::CoreSearchType> CoreSearch(
         clEnumValN(Searcher::NURS_CPICnt, "nurs:cpicnt",
                    "use NURS with CallPath-Instr-Count"),
         clEnumValN(Searcher::NURS_QC, "nurs:qc", "use NURS with Query-Cost"),
-        clEnumValN(Searcher::PARAM, "param", "use Paremeterized Search")
+        clEnumValN(Searcher::PARAM, "param", "use Parameterized Search")
             KLEE_LLVM_CL_VAL_END),
     cl::cat(SearchCat));
 
