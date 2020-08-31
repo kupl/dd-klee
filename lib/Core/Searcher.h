@@ -331,9 +331,9 @@ namespace klee {
     ExecutionState* top;
     std::vector<double> weights;
 
-    typedef std::map<ExecutionState*, std::vector<double>> fv_map_t;
-    fv_map_t extractFeatures(const std::vector<ExecutionState*> states);
-    void computeScores(fv_map_t &fvmap);
+    typedef std::map<ExecutionState*, std::vector<int>> fv_map_t;
+    fv_map_t extractFeatures();
+    void computeScores(const fv_map_t &fv_map);
     // PARAM_TODO: decide whether Executor object is needed as a member
     // Executor &executor;
 

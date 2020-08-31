@@ -484,13 +484,20 @@ ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) {
 }
 
 ParameterizedSearcher::~ParameterizedSearcher() {}
+ 
+ParameterizedSearcher::fv_map_t
+ParameterizedSearcher::extractFeatures() {
+  ParameterizedSearcher::fv_map_t fv_map;
+  for(auto s : states) {
+    fv_map.emplace(s, std::vector<int>());
+  }
 
-ParameterizedSearcher::fv_map_t 
-ParameterizedSearcher::extractFeatures(const std::vector<ExecutionState*> states) {
+  // PARAM_TODO: feature implementation
 
+  return fv_map;
 }
 
-void ParameterizedSearcher::computeScores(ParameterizedSearcher::fv_map_t &fvmap) {
+void ParameterizedSearcher::computeScores(const ParameterizedSearcher::fv_map_t &fv_map) {
 
 }
 
@@ -503,4 +510,28 @@ void ParameterizedSearcher::update(
     ExecutionState *current,
     const std::vector<ExecutionState *> &addedStates,
     const std::vector<ExecutionState *> &removedStates) {
+  states.insert(states.end(),
+                addedStates.begin(),
+                addedStates.end());
+  for (std::vector<ExecutionState *>::const_iterator it = removedStates.begin(),
+                                                     ie = removedStates.end();
+       it != ie; ++it) {
+    ExecutionState *es = *it;
+    bool ok = false;
+
+    for (std::vector<ExecutionState *>::const_iterator it = states.begin(),
+                                                      ie = states.end();
+         it != ie; ++it) {
+      if (es == *it) {
+        states.erase(it);
+        ok = true;
+        break;
+      }
+    }
+
+    assert(ok && "invalid state removed");
+  }
+
+  const ParameterizedSearcher::fv_map_t &fv_map = extractFeatures();
+  computeScores(fv_map); 
 }
