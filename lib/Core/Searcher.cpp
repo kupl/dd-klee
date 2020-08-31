@@ -473,9 +473,16 @@ void InterleavedSearcher::update(
 ///
 
 // PARAM_TODO:
-// 1. define constructors
-// 2. feature extraction and score calculation
-ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) {}
+// 1. feature extraction and score calculation
+ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) {
+  double weight;
+  std::ifstream win(weightFile.c_str());
+
+  assert(win && "no weight file");
+  while (win >> weight)
+    weights.push_back(weight);
+}
+
 ParameterizedSearcher::~ParameterizedSearcher() {}
 
 ParameterizedSearcher::fv_map_t 
