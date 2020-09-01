@@ -31,9 +31,9 @@ autoconf/aclocal.m4
 autoconf/autom4te.cache/
 autom4te.cache/
 
-# IDE
+# For platform and IDE
 .vscode
+.DS_Store
 
 # examples-related files
-examples/*/*.bc
-examples/*/klee*
+examples/**
