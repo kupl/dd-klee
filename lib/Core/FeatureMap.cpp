@@ -25,6 +25,7 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
 FeatureMap::~FeatureMap() {}
 
 void FeatureMap::updateMap(const std::vector<ExecutionState*> &states) {
+  fv_map.clear();
   for(auto f : features) {
     checkedStates = (*f)(states);
     int statesCount = checkedStates.size();
