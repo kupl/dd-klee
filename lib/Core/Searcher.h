@@ -350,9 +350,6 @@ namespace klee {
       os << "ParameterizedSearcher\n";
     }
 
-    enum Feature {
-      // PARAM_TODO: fill out features
-    };
   };
 }
 
