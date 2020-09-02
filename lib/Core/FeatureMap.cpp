@@ -4,6 +4,7 @@
 #include "klee/ExecutionState.h"
 
 #include <map>
+#include <numeric>
 #include <fstream>
 #include <vector>
 
@@ -37,7 +38,17 @@ void FeatureMap::updateMap(const std::vector<ExecutionState*> &states) {
 }
 
 ExecutionState* FeatureMap::getTop(const std::vector<ExecutionState*> &states) {
-  // PARAM_TODO : Implement Y = Wx
-	return states.back();
+  ExecutionState* topState = 0;
+  double topScore = -100000000;
+  for(auto it = fv_map.begin(); it != fv_map.end(); ++it) {
+    std::vector<int> fv = it->second;
+    double score = std::inner_product(fv.begin(), fv.end(), weights.begin(), 0);
+    if (score > topScore) {
+      topState = it->first;
+      topScore = score;
+    }
+  }
+
+  return topState;
 }
 	
