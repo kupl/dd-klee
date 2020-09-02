@@ -11,6 +11,7 @@
 
 #include "CoreStats.h"
 #include "Executor.h"
+#include "FeatureMap.h"
 #include "PTree.h"
 #include "StatsTracker.h"
 
@@ -472,33 +473,15 @@ void InterleavedSearcher::update(
 
 ///
 
-// PARAM_TODO:
-// 1. feature extraction and score calculation
-ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) {
-  double weight;
-  std::ifstream win(weightFile.c_str());
+ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) :
+  fv_map(states, weightFile) {
 
-  assert(win && "no weight file");
-  while (win >> weight)
-    weights.push_back(weight);
 }
 
 ParameterizedSearcher::~ParameterizedSearcher() {}
  
-ParameterizedSearcher::fv_map_t
-ParameterizedSearcher::extractFeatures() {
-  ParameterizedSearcher::fv_map_t fv_map;
-  for(auto s : states) {
-    fv_map.emplace(s, std::vector<int>());
-  }
-
-  // PARAM_TODO: feature implementation
-
-  return fv_map;
-}
-
-void ParameterizedSearcher::computeScores(const ParameterizedSearcher::fv_map_t &fv_map) {
-
+void ParameterizedSearcher::extractFeatures() {
+  fv_map.updateMap(states);
 }
 
 ExecutionState &ParameterizedSearcher::selectState() {
@@ -532,6 +515,6 @@ void ParameterizedSearcher::update(
     assert(ok && "invalid state removed");
   }
 
-  const ParameterizedSearcher::fv_map_t &fv_map = extractFeatures();
-  computeScores(fv_map); 
+  extractFeatures();
+  top = fv_map.getTop(states);
 }

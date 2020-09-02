@@ -15,6 +15,8 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include "FeatureMap.h"
+
 #include <map>
 #include <queue>
 #include <set>
@@ -329,11 +331,9 @@ namespace klee {
   class ParameterizedSearcher : public Searcher {
     std::vector<ExecutionState*> states;
     ExecutionState* top;
-    std::vector<double> weights;
 
-    typedef std::map<ExecutionState*, std::vector<int>> fv_map_t;
-    fv_map_t extractFeatures();
-    void computeScores(const fv_map_t &fv_map);
+    FeatureMap fv_map;
+    void extractFeatures();
     // PARAM_TODO: decide whether Executor object is needed as a member
     // Executor &executor;
 
