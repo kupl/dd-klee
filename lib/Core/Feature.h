@@ -24,4 +24,14 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
+class NXTInstAggregateOperation : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
+class NXTInstVectorOperation : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
 #endif /* KLEE_FEATURE_H */
