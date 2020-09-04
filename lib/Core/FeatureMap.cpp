@@ -22,6 +22,8 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new NXTInstAggregateOperation());
   features.push_back(new NXTInstVectorOperation());
 
+  features.push_back(new SmallestInstructionStepped());
+
   featureCount = features.size();
 }
 

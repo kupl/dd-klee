@@ -8,7 +8,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
 
-#include <map>
+#include <set>
 #include <vector>
 
 using namespace klee;
@@ -79,6 +79,30 @@ std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<Execution
 
     checked.push_back(i == Instruction::InsertElement ||
                       i == Instruction::ExtractElement);
+  }
+
+  return checked;
+}
+
+// Features related to instruction history
+std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  // (steppedInstructions, ExecutionState*) sorted by steppedInstructions
+  std::set<std::pair<uint64_t, ExecutionState*>> st_set;
+
+  for(auto st : states) {
+    st_set.insert(std::make_pair(st->steppedInstructions, st));
+  }
+
+  auto boundary = st_set.begin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.begin(); it != boundary; it++) {
+    checked.push_back(true);
+  }
+  for(auto it = boundary; it != st_set.end(); it++) {
+    checked.push_back(false);
   }
 
   return checked;
