@@ -88,13 +88,14 @@ std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<Execution
 
 // Features related to instruction history
 std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked;
+  std::vector<bool> checked(states.size());
 
-  // (steppedInstructions, ExecutionState*) sorted by steppedInstructions
-  std::set<std::pair<uint64_t, ExecutionState*>> st_set;
+  // (steppedInstructions, (ExecutionState*, index of state)) sorted by steppedInstructions
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
+  size_t i = 0;
   for(const auto &st : states) {
-    st_set.insert(std::make_pair(st->steppedInstructions, st));
+    st_set.insert(std::make_pair(st->steppedInstructions, std::make_pair(st, i++)));
   }
 
   // criterion: 10%
@@ -102,23 +103,24 @@ std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<Execu
   std::advance(boundary, st_set.size() * 0.1);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked.push_back(true);
+    checked[(it->second).second] = true;
   }
   for(auto it = boundary; it != st_set.cend(); it++) {
-    checked.push_back(false);
+    checked[(it->second).second] = false;
   }
 
   return checked;
 }
 
 std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked;
+  std::vector<bool> checked(states.size());
 
-  // (instsSinceCovNew, ExecutionState*) sorted by instsSinceCovNew
-  std::set<std::pair<uint64_t, ExecutionState*>> st_set;
+  // (instsSinceCovNew, (ExecutionState*, index of state)) sorted by instsSinceCovNew
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
+  size_t i = 0;
   for(const auto &st : states) {
-    st_set.insert(std::make_pair(st->instsSinceCovNew, st));
+    st_set.insert(std::make_pair(st->instsSinceCovNew, std::make_pair(st, i++)));
   }
 
   // criterion: 10%
@@ -126,25 +128,26 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
   std::advance(boundary, st_set.size() * 0.1);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked.push_back(true);
+    checked[(it->second).second] = true;
   }
   for(auto it = boundary; it != st_set.cend(); it++) {
-    checked.push_back(false);
+    checked[(it->second).second] = false;
   }
 
   return checked;
 }
 
 std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked;
+  std::vector<bool> checked(states.size());
 
-  // (CallPathInstructions, ExecutionState*) sorted by CallPathInstructions
+  // (CallPathInstructions, (ExecutionState*, index of state)) sorted by CallPathInstructions
   // CallPathInstruction: instructions in currently executing function
-  std::set<std::pair<uint64_t, ExecutionState*>> st_set;
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
+  size_t i = 0;
   for(const auto &st : states) {
     uint64_t CPInsts = st->stack.back().callPathNode->statistics.getValue(stats::instructions);
-    st_set.insert(std::make_pair(CPInsts, st));
+    st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
   }
 
   // criterion: 10%
@@ -152,10 +155,10 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
   std::advance(boundary, st_set.size() * 0.1);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked.push_back(true);
+    checked[(it->second).second] = true;
   }
   for(auto it = boundary; it != st_set.cend(); it++) {
-    checked.push_back(false);
+    checked[(it->second).second] = false;
   }
 
   return checked;
@@ -163,14 +166,15 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
 
 // Features related to path condition
 std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked;
+  std::vector<bool> checked(states.size());
 
-  // (queroCost, ExecutionState*) sorted by queryCost
-  std::set<std::pair<double, ExecutionState*>> st_set;
+  // (queryCost, (ExecutionState*, index of state)) sorted by queryCost
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
+  size_t i = 0;
   for(const auto &st : states) {
     double qc = st->queryCost.toSeconds();
-    st_set.insert(std::make_pair(qc, st));
+    st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
   }
 
   // criterion: 10%
@@ -178,10 +182,10 @@ std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*>
   std::advance(boundary, st_set.size() * 0.1);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked.push_back(true);
+    checked[(it->second).second] = true;
   }
   for(auto it = boundary; it != st_set.cend(); it++) {
-    checked.push_back(false);
+    checked[(it->second).second] = false;
   }
 
   return checked;
