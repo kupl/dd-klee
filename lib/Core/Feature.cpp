@@ -108,3 +108,27 @@ std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<Execu
 
   return checked;
 }
+
+std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  // (instsSinceCovNew, ExecutionState*) sorted by instsSinceCovNews
+  std::set<std::pair<uint64_t, ExecutionState*>> st_set;
+
+  for(const auto &st : states) {
+    st_set.insert(std::make_pair(st->instsSinceCovNew, st));
+  }
+
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked.push_back(true);
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked.push_back(false);
+  }
+
+  return checked;
+}
