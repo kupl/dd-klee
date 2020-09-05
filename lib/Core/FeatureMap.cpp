@@ -36,7 +36,7 @@ void FeatureMap::updateMap(const std::vector<ExecutionState*> &states) {
   for(const auto f : features) {
     checkedStates = (*f)(states);
     int statesCount = checkedStates.size();
-    assert(statesCount == states.size() && "undesired behavior in feature extraction");
+    assert(statesCount == (int)states.size() && "undesired behavior in feature extraction");
     for(int i = 0; i < statesCount; i++) {
       fv_map[states[i]].push_back(checkedStates[i]);
     }
