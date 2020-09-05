@@ -1,4 +1,6 @@
 
+#include "CallPathManager.h"
+#include "CoreStats.h"
 #include "Feature.h"
 
 #include "klee/ExecutionState.h"
@@ -117,6 +119,32 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
 
   for(const auto &st : states) {
     st_set.insert(std::make_pair(st->instsSinceCovNew, st));
+  }
+
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked.push_back(true);
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked.push_back(false);
+  }
+
+  return checked;
+}
+
+std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  // (CallPathInstructions, ExecutionState*) sorted by instsSinceCovNews
+  // CallPathInstruction: instructions in currently executing function
+  std::set<std::pair<uint64_t, ExecutionState*>> st_set;
+
+  for(const auto &st : states) {
+    uint64_t CPInsts = st->stack.back().callPathNode->statistics.getValue(stats::instructions);
+    st_set.insert(std::make_pair(CPInsts, st));
   }
 
   // criterion: 10%

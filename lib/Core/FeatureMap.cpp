@@ -24,6 +24,7 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
 
   features.push_back(new SmallestInstructionStepped());
   features.push_back(new SmallestInstructionsSinceCovNew());
+  features.push_back(new SmallestCallPathInstruction());
 
   featureCount = features.size();
 }
