@@ -26,6 +26,8 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new SmallestInstructionsSinceCovNew());
   features.push_back(new SmallestCallPathInstruction());
 
+  features.push_back(new LowestQueryCost());
+
   featureCount = features.size();
 
   assert(featureCount == (int)weights.size() && "weight size error");

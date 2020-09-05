@@ -160,3 +160,29 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
 
   return checked;
 }
+
+// Features related to path condition
+std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  // (queroCost, ExecutionState*) sorted by queryCost
+  std::set<std::pair<double, ExecutionState*>> st_set;
+
+  for(const auto &st : states) {
+    double qc = st->queryCost.toSeconds();
+    st_set.insert(std::make_pair(qc, st));
+  }
+
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked.push_back(true);
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked.push_back(false);
+  }
+
+  return checked;
+}
