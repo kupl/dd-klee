@@ -31,7 +31,7 @@ FeatureMap::~FeatureMap() {}
 
 void FeatureMap::updateMap(const std::vector<ExecutionState*> &states) {
   fv_map.clear();
-  for(auto f : features) {
+  for(const auto f : features) {
     checkedStates = (*f)(states);
     int statesCount = checkedStates.size();
     assert(statesCount == states.size() && "undesired behavior in feature extraction");
@@ -44,11 +44,11 @@ void FeatureMap::updateMap(const std::vector<ExecutionState*> &states) {
 ExecutionState* FeatureMap::getTop(const std::vector<ExecutionState*> &states) {
   ExecutionState* topState = 0;
   double topScore = -100000000;
-  for(auto it = fv_map.begin(); it != fv_map.end(); ++it) {
-    std::vector<int> fv = it->second;
-    double score = std::inner_product(fv.begin(), fv.end(), weights.begin(), 0);
+  for(const auto &fvector : fv_map) {
+    const auto &v = fvector.second;
+    double score = std::inner_product(v.begin(), v.end(), weights.begin(), 0);
     if (score > topScore) {
-      topState = it->first;
+      topState = fvector.first;
       topScore = score;
     }
   }
