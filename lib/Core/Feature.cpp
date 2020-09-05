@@ -114,7 +114,7 @@ std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<Execu
 std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
-  // (instsSinceCovNew, ExecutionState*) sorted by instsSinceCovNews
+  // (instsSinceCovNew, ExecutionState*) sorted by instsSinceCovNew
   std::set<std::pair<uint64_t, ExecutionState*>> st_set;
 
   for(const auto &st : states) {
@@ -138,7 +138,7 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
 std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
-  // (CallPathInstructions, ExecutionState*) sorted by instsSinceCovNews
+  // (CallPathInstructions, ExecutionState*) sorted by CallPathInstructions
   // CallPathInstruction: instructions in currently executing function
   std::set<std::pair<uint64_t, ExecutionState*>> st_set;
 
