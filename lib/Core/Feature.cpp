@@ -20,7 +20,7 @@ using namespace llvm;
 std::vector<bool> NXTInstExternalFunctionCall::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
   
-  for(auto st : states) {
+  for(const auto &st : states) {
     Instruction *nextInst = st->pc->inst;
     unsigned int i = nextInst->getOpcode();
     
@@ -33,7 +33,7 @@ std::vector<bool> NXTInstExternalFunctionCall::operator()(const std::vector<Exec
 std::vector<bool> NXTInstFPOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
-  for(auto st : states) {
+  for(const auto &st : states) {
     Instruction *nextInst = st->pc->inst;
     unsigned int i = nextInst->getOpcode();
 
@@ -58,7 +58,7 @@ std::vector<bool> NXTInstFPOperation::operator()(const std::vector<ExecutionStat
 std::vector<bool> NXTInstAggregateOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
-  for(auto st : states) {
+  for(const auto &st : states) {
     Instruction *nextInst = st->pc->inst;
     unsigned int i = nextInst->getOpcode();
 
@@ -73,7 +73,7 @@ std::vector<bool> NXTInstAggregateOperation::operator()(const std::vector<Execut
 std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
-  for(auto st : states) {
+  for(const auto &st : states) {
     Instruction *nextInst = st->pc->inst;
     unsigned int i = nextInst->getOpcode();
 
@@ -91,17 +91,18 @@ std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<Execu
   // (steppedInstructions, ExecutionState*) sorted by steppedInstructions
   std::set<std::pair<uint64_t, ExecutionState*>> st_set;
 
-  for(auto st : states) {
+  for(const auto &st : states) {
     st_set.insert(std::make_pair(st->steppedInstructions, st));
   }
 
-  auto boundary = st_set.begin();
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
   std::advance(boundary, st_set.size() * 0.1);
 
-  for(auto it = st_set.begin(); it != boundary; it++) {
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked.push_back(true);
   }
-  for(auto it = boundary; it != st_set.end(); it++) {
+  for(auto it = boundary; it != st_set.cend(); it++) {
     checked.push_back(false);
   }
 
