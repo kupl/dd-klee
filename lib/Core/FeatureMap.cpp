@@ -29,6 +29,7 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new LowestQueryCost());
   features.push_back(new ShallowestState());
   features.push_back(new DeepestState());
+  features.push_back(new ShortestConstraints());
 
   featureCount = features.size();
 

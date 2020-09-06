@@ -243,3 +243,29 @@ std::vector<bool> DeepestState::operator()(const std::vector<ExecutionState*> &s
 
   return checked;
 }
+
+std::vector<bool> ShortestConstraints::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (constraintsSize, (ExecutionState*, index of state)) sorted by constraintsSize
+  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    size_t constraintsSize = st->constraints.size();
+    st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
+  }
+
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
