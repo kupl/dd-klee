@@ -10,6 +10,8 @@
 using namespace klee;
 
 namespace klee {
+  class Executor;
+
 class Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states) = 0;
@@ -32,6 +34,13 @@ public:
 
 class NXTInstVectorOperation : public Feature {
 public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
+class NXTInstSwitchWithSym : public Feature {
+  const Executor &executor;
+public:
+  NXTInstSwitchWithSym(const Executor &_executor);
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 

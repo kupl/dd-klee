@@ -1,6 +1,7 @@
 
 #include "CallPathManager.h"
 #include "CoreStats.h"
+#include "Executor.h"
 #include "Feature.h"
 
 #include "klee/ExecutionState.h"
@@ -81,6 +82,31 @@ std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<Execution
 
     checked.push_back(i == Instruction::InsertElement ||
                       i == Instruction::ExtractElement);
+  }
+
+  return checked;
+}
+
+NXTInstSwitchWithSym::NXTInstSwitchWithSym(const Executor &_executor)
+  : executor(_executor) {
+}
+
+std::vector<bool> NXTInstSwitchWithSym::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  for(const auto &st : states) {
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i->getOpcode();
+
+    bool isSwitch = (opcode == Instruction::Switch);
+    if (!isSwitch) {
+      checked.push_back(false);
+    } else {
+      ref<Expr> cond = executor.eval(ki, 0, *st).value;
+      bool withSym = !(dyn_cast<ConstantExpr>(cond));
+      checked.push_back(withSym);
+    }
   }
 
   return checked;

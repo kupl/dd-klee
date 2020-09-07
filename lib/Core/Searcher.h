@@ -334,11 +334,9 @@ namespace klee {
 
     FeatureMap fv_map;
     void extractFeatures();
-    // PARAM_TODO: decide whether Executor object is needed as a member
-    // Executor &executor;
 
   public:
-    ParameterizedSearcher(const std::string &weightFile);
+    ParameterizedSearcher(const std::string &weightFile, const Executor &_executor);
     ~ParameterizedSearcher();
 
     ExecutionState &selectState();

@@ -9,7 +9,9 @@
 #include <vector>
 
 FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
-                                   const std::string &weightFile) {
+                       const std::string &weightFile,
+                       const Executor &_executor)
+  : executor(_executor) {
   double weight;
   std::ifstream win(weightFile.c_str());
 
@@ -21,6 +23,7 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new NXTInstFPOperation());
   features.push_back(new NXTInstAggregateOperation());
   features.push_back(new NXTInstVectorOperation());
+  features.push_back(new NXTInstSwitchWithSym(executor));
 
   features.push_back(new SmallestInstructionStepped());
   features.push_back(new SmallestInstructionsSinceCovNew());

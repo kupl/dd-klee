@@ -91,6 +91,9 @@ class Executor : public Interpreter {
   friend class StatsTracker;
   friend class MergeHandler;
 
+  // For features used by ParameterizedSearcher
+  friend class NXTInstSwitchWithSym;
+
 public:
   typedef std::pair<ExecutionState*,ExecutionState*> StatePair;
 

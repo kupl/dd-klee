@@ -473,9 +473,9 @@ void InterleavedSearcher::update(
 
 ///
 
-ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile) :
-  fv_map(states, weightFile) {
-
+ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile,
+                                             const Executor &_executor)
+  : fv_map(states, weightFile, _executor) {
 }
 
 ParameterizedSearcher::~ParameterizedSearcher() {}
