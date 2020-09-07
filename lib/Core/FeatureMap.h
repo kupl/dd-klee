@@ -11,6 +11,8 @@
 
 using namespace klee;
 
+namespace klee {
+
 class FeatureMap {
     int featureCount;
     std::vector<Feature*> features;
@@ -25,5 +27,7 @@ class FeatureMap {
     void updateMap(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);
 };
+
+} // End klee namespace
 
 #endif /* KLEE_FEATUREMAP_H */

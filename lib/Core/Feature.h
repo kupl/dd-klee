@@ -9,6 +9,7 @@
 
 using namespace klee;
 
+namespace klee {
 class Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states) = 0;
@@ -68,5 +69,7 @@ class ShortestConstraints : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
+
+} // End klee namespace
 
 #endif /* KLEE_FEATURE_H */
