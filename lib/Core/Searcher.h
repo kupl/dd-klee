@@ -336,7 +336,7 @@ namespace klee {
     void extractFeatures();
 
   public:
-    ParameterizedSearcher(const std::string &weightFile, const Executor &_executor);
+    ParameterizedSearcher(const std::string &weightFile, Executor &_executor);
     ~ParameterizedSearcher();
 
     ExecutionState &selectState();

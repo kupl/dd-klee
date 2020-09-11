@@ -87,7 +87,7 @@ std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<Execution
   return checked;
 }
 
-NXTInstSwitchWithSym::NXTInstSwitchWithSym(const Executor &_executor)
+NXTInstSwitchWithSym::NXTInstSwitchWithSym(Executor &_executor)
   : executor(_executor) {
 }
 
@@ -105,6 +105,32 @@ std::vector<bool> NXTInstSwitchWithSym::operator()(const std::vector<ExecutionSt
     } else {
       ref<Expr> cond = executor.eval(ki, 0, *st).value;
       bool withSym = !(dyn_cast<ConstantExpr>(cond));
+      checked.push_back(withSym);
+    }
+  }
+
+  return checked;
+}
+
+NXTInstIndirectBrWithSym::NXTInstIndirectBrWithSym(Executor &_executor)
+  : executor(_executor) {
+}
+
+std::vector<bool> NXTInstIndirectBrWithSym::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  for(const auto &st : states) {
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i->getOpcode();
+
+    bool isIndirectBr = (opcode == Instruction::IndirectBr);
+    if (!isIndirectBr) {
+      checked.push_back(false);
+    } else {
+      ref<Expr> address = executor.eval(ki, 0, *st).value;
+      address = executor.toUnique(*st, address);
+      bool withSym = !(dyn_cast<ConstantExpr>(address.get()));
       checked.push_back(withSym);
     }
   }

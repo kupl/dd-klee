@@ -38,9 +38,17 @@ public:
 };
 
 class NXTInstSwitchWithSym : public Feature {
-  const Executor &executor;
+  Executor &executor;
 public:
-  NXTInstSwitchWithSym(const Executor &_executor);
+  NXTInstSwitchWithSym(Executor &_executor);
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
+class NXTInstIndirectBrWithSym : public Feature {
+  // NOTE: const reference type cannot call executor.toUnique
+  Executor &executor;
+public:
+  NXTInstIndirectBrWithSym(Executor &_executor);
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 

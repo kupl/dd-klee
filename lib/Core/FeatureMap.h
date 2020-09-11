@@ -15,7 +15,7 @@ namespace klee {
   class Executor;
 
 class FeatureMap {
-    const Executor &executor;
+    Executor &executor;
     int featureCount;
     std::vector<Feature*> features;
     std::vector<double> weights;
@@ -25,7 +25,7 @@ class FeatureMap {
   public:
     FeatureMap(const std::vector<ExecutionState*> &states,
                const std::string &weightFile,
-               const Executor &_executor);
+               Executor &_executor);
     ~FeatureMap();
     void updateMap(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);

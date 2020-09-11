@@ -93,6 +93,7 @@ class Executor : public Interpreter {
 
   // For features used by ParameterizedSearcher
   friend class NXTInstSwitchWithSym;
+  friend class NXTInstIndirectBrWithSym;
 
 public:
   typedef std::pair<ExecutionState*,ExecutionState*> StatePair;
