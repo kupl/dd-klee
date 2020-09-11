@@ -147,7 +147,8 @@ std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<Execu
 
   size_t i = 0;
   for(const auto &st : states) {
-    st_set.insert(std::make_pair(st->steppedInstructions, std::make_pair(st, i++)));
+    uint64_t steppedInstructions = st->steppedInstructions;
+    st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
   }
 
   // criterion: 10%
@@ -168,11 +169,12 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
   std::vector<bool> checked(states.size());
 
   // (instsSinceCovNew, (ExecutionState*, index of state)) sorted by instsSinceCovNew
-  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
   size_t i = 0;
   for(const auto &st : states) {
-    st_set.insert(std::make_pair(st->instsSinceCovNew, std::make_pair(st, i++)));
+    unsigned int instsSinceCovNew = st->instsSinceCovNew;
+    st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
   }
 
   // criterion: 10%
@@ -277,7 +279,7 @@ std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*>
   std::vector<bool> checked(states.size());
 
   // (queryCost, (ExecutionState*, index of state)) sorted by queryCost
-  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, std::pair<ExecutionState*, size_t>>> st_set;
 
   size_t i = 0;
   for(const auto &st : states) {
