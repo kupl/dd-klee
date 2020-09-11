@@ -216,6 +216,62 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
   return checked;
 }
 
+// Features related to symbolic memory state
+std::vector<bool> SmallestSymbolics::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (symbolics.size(), (ExecutionState*, index of state)) sorted by symbolics.size()
+  // with ascending order 
+  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st: states) {
+    size_t symSize = st->symbolics.size();
+    st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
+  }
+
+  //criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
+std::vector<bool> LargestSymbolics::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (symbolics.size(), (ExecutionState*, index of state)) sorted by symbolics.size()
+  // with descending order 
+  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st: states) {
+    size_t symSize = st->symbolics.size();
+    st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
+  }
+
+  //criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
 // Features related to path condition
 std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());

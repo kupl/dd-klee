@@ -30,6 +30,9 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new SmallestInstructionsSinceCovNew());
   features.push_back(new SmallestCallPathInstruction());
 
+  features.push_back(new SmallestSymbolics());
+  features.push_back(new LargestSymbolics());
+
   features.push_back(new LowestQueryCost());
   features.push_back(new ShallowestState());
   features.push_back(new DeepestState());
