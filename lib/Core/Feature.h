@@ -74,6 +74,11 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
+class ClosestToUncoveredInst : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
 class SmallestSymbolics : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);

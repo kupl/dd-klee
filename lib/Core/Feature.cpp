@@ -3,6 +3,7 @@
 #include "CoreStats.h"
 #include "Executor.h"
 #include "Feature.h"
+#include "StatsTracker.h"
 
 #include "klee/ExecutionState.h"
 #include "klee/Internal/Module/InstructionInfoTable.h"
@@ -240,6 +241,33 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
   for(const auto &st : states) {
     uint64_t CPInsts = st->stack.back().callPathNode->statistics.getValue(stats::instructions);
     st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
+  }
+
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
+std::vector<bool> ClosestToUncoveredInst::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (md2u, (ExecutionState*, index of state)) sorted by md2u
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    StackFrame &sf = st->stack.back();
+    uint64_t md2u = computeMinDistToUncovered(st->pc, sf.minDistToUncoveredOnReturn);
+    st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
   }
 
   // criterion: 10%
