@@ -25,10 +25,11 @@ std::vector<bool> NXTInstExternalFunctionCall::operator()(const std::vector<Exec
   std::vector<bool> checked;
   
   for(const auto &st : states) {
-    Instruction *nextInst = st->pc->inst;
-    unsigned int i = nextInst->getOpcode();
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i ->getOpcode();
     
-    checked.push_back((i == Instruction::Invoke) || (i == Instruction::Call));
+    checked.push_back((opcode == Instruction::Invoke) || (opcode == Instruction::Call));
   }
 
   return checked;
@@ -38,22 +39,22 @@ std::vector<bool> NXTInstFPOperation::operator()(const std::vector<ExecutionStat
   std::vector<bool> checked;
 
   for(const auto &st : states) {
-    Instruction *nextInst = st->pc->inst;
-    unsigned int i = nextInst->getOpcode();
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(i == Instruction::FAdd ||
-                      i == Instruction::FSub ||
-                      i == Instruction::FMul ||
-                      i == Instruction::FDiv ||
-                      i == Instruction::FRem ||
-                      i == Instruction::FPTrunc ||
-                      i == Instruction::FPExt ||
-                      i == Instruction::FPToUI ||
-                      i == Instruction::FPToSI ||
-                      i == Instruction::UIToFP ||
-                      i == Instruction::SIToFP ||
-                      i == Instruction::FCmp );
-
+    checked.push_back(opcode == Instruction::FAdd ||
+                      opcode == Instruction::FSub ||
+                      opcode == Instruction::FMul ||
+                      opcode == Instruction::FDiv ||
+                      opcode == Instruction::FRem ||
+                      opcode == Instruction::FPTrunc ||
+                      opcode == Instruction::FPExt ||
+                      opcode == Instruction::FPToUI ||
+                      opcode == Instruction::FPToSI ||
+                      opcode == Instruction::UIToFP ||
+                      opcode == Instruction::SIToFP ||
+                      opcode == Instruction::FCmp );
   }
 
   return checked;
@@ -63,12 +64,13 @@ std::vector<bool> NXTInstAggregateOperation::operator()(const std::vector<Execut
   std::vector<bool> checked;
 
   for(const auto &st : states) {
-    Instruction *nextInst = st->pc->inst;
-    unsigned int i = nextInst->getOpcode();
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(i == Instruction::MemoryOps::GetElementPtr ||
-                      i == Instruction::InsertValue ||
-                      i == Instruction::ExtractValue );
+    checked.push_back(opcode == Instruction::MemoryOps::GetElementPtr ||
+                      opcode == Instruction::InsertValue ||
+                      opcode == Instruction::ExtractValue );
   }
 
   return checked;
@@ -78,11 +80,12 @@ std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<Execution
   std::vector<bool> checked;
 
   for(const auto &st : states) {
-    Instruction *nextInst = st->pc->inst;
-    unsigned int i = nextInst->getOpcode();
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(i == Instruction::InsertElement ||
-                      i == Instruction::ExtractElement);
+    checked.push_back(opcode == Instruction::InsertElement ||
+                      opcode == Instruction::ExtractElement);
   }
 
   return checked;
