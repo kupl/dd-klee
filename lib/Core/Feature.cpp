@@ -8,6 +8,7 @@
 #include "klee/Internal/Module/InstructionInfoTable.h"
 #include "klee/Internal/Module/KInstruction.h"
 
+#include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
 
@@ -105,6 +106,40 @@ std::vector<bool> NXTInstSwitchWithSym::operator()(const std::vector<ExecutionSt
     } else {
       ref<Expr> cond = executor.eval(ki, 0, *st).value;
       bool withSym = !(dyn_cast<ConstantExpr>(cond));
+      checked.push_back(withSym);
+    }
+  }
+
+  return checked;
+}
+
+NXTInstAllocaWithSym::NXTInstAllocaWithSym(Executor &_executor)
+  : executor(_executor) {
+}
+
+std::vector<bool> NXTInstAllocaWithSym::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  for(const auto &st : states) {
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i->getOpcode();
+
+    bool isAlloca = (opcode == Instruction::Alloca);
+    if (!isAlloca) {
+      checked.push_back(false);
+    } else {
+      AllocaInst *ai = cast<AllocaInst>(i);
+      unsigned elementSize = 
+        (executor.kmodule)->targetData->getTypeStoreSize(ai->getAllocatedType());
+      ref<Expr> size = Expr::createPointer(elementSize);
+      if (ai->isArrayAllocation()) {
+        ref<Expr> count = executor.eval(ki, 0, *st).value;
+        count = Expr::createZExtToPointerWidth(count);
+        size = MulExpr::create(size, count);
+      }
+      size = executor.toUnique(*st, size);
+      bool withSym = !(dyn_cast<ConstantExpr>(size));
       checked.push_back(withSym);
     }
   }

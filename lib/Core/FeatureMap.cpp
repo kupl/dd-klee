@@ -24,6 +24,7 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new NXTInstAggregateOperation());
   features.push_back(new NXTInstVectorOperation());
   features.push_back(new NXTInstSwitchWithSym(executor));
+  features.push_back(new NXTInstAllocaWithSym(executor));
   features.push_back(new NXTInstIndirectBrWithSym(executor));
 
   features.push_back(new SmallestInstructionStepped());

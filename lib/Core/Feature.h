@@ -44,6 +44,13 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
+class NXTInstAllocaWithSym : public Feature {
+  Executor &executor;
+public:
+  NXTInstAllocaWithSym(Executor &_executor);
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
 class NXTInstIndirectBrWithSym : public Feature {
   // NOTE: const reference type cannot call executor.toUnique
   Executor &executor;
