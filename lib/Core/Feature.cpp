@@ -340,6 +340,88 @@ std::vector<bool> LargestSymbolics::operator()(const std::vector<ExecutionState*
   return checked;
 }
 
+std::vector<bool> HighestNumOfConstExpr::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (constCnt, (ExecutionState*, index of state)) sorted by constCnt
+  // with descending order
+  // constCnt: the number of local variables mapped with concrete values;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    unsigned int constCnt = 0;
+    for(auto &sf : st->stack) {
+      unsigned int numRegisters = sf.kf->numRegisters;
+      Cell *locals = sf.locals;
+
+      for(unsigned int i = 0; i < numRegisters; i++) {
+        ref<Expr> value = (locals + i) -> value;
+        if(!value.get())
+          continue;
+        if(isa<ConstantExpr>(value))
+          constCnt++;
+      }
+    }
+    st_set.insert(std::make_pair(constCnt, std::make_pair(st, i++)));
+  }
+
+  //criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
+std::vector<bool> HighestNumOfSymExpr::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (symCnt, (ExecutionState*, index of state)) sorted by symCnt
+  // with descending order 
+  // symCnt: the number of local variables mapped with symbolic expressions
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    unsigned int symCnt = 0;
+    for(auto &sf : st->stack) {
+      unsigned int numRegisters = sf.kf->numRegisters;
+      Cell *locals = sf.locals;
+
+      for(unsigned int i = 0; i < numRegisters; i++) {
+        ref<Expr> value = (locals + i) -> value;
+        if(!value.get())
+          continue;
+        if(!isa<ConstantExpr>(value))
+          symCnt++;
+      }
+    }
+    st_set.insert(std::make_pair(symCnt, std::make_pair(st, i++)));
+  }
+
+  //criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
 // Features related to path condition
 std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
