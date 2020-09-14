@@ -285,6 +285,61 @@ std::vector<bool> ClosestToUncoveredInst::operator()(const std::vector<Execution
 }
 
 // Features related to symbolic memory state
+std::vector<bool> SmallestAddressSpace::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (addressSpaceSize, (ExecutionState*, index of state)) stored by addressSpaceSize
+  // with ascending order
+  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
+  
+  size_t i = 0;
+  for(const auto &st: states) {
+    size_t addressSpaceSize = st->addressSpace.objects.size();
+    st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
+  }
+
+  //criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
+std::vector<bool> LargestAddressSpace::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (addressSpaceSize, (ExecutionState*, index of state)) stored by addressSpaceSize
+  // with descending order
+  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>> st_set;
+  
+  size_t i = 0;
+  for(const auto &st: states) {
+    size_t addressSpaceSize = st->addressSpace.objects.size();
+    st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
+  }
+
+  //criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
 std::vector<bool> SmallestSymbolics::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 

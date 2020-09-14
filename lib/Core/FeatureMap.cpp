@@ -32,6 +32,8 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new SmallestCallPathInstruction());
   features.push_back(new ClosestToUncoveredInst());
 
+  features.push_back(new SmallestAddressSpace());
+  features.push_back(new LargestAddressSpace());
   features.push_back(new SmallestSymbolics());
   features.push_back(new LargestSymbolics());
   features.push_back(new HighestNumOfConstExpr());

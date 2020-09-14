@@ -79,6 +79,16 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
+class SmallestAddressSpace : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
+class LargestAddressSpace : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
 class SmallestSymbolics : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
