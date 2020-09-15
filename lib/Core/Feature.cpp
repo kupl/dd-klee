@@ -22,7 +22,7 @@ using namespace llvm;
 // PARAM_TODO: categorize features and modularize calculation
 
 // Features related to next instruction
-std::vector<bool> NXTInstExternalFunctionCall::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstExternalFunctionCall::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
   
   for(const auto &st : states) {
@@ -36,7 +36,7 @@ std::vector<bool> NXTInstExternalFunctionCall::operator()(const std::vector<Exec
   return checked;
 }
 
-std::vector<bool> NXTInstFPOperation::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstFPOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
   for(const auto &st : states) {
@@ -61,7 +61,7 @@ std::vector<bool> NXTInstFPOperation::operator()(const std::vector<ExecutionStat
   return checked;
 }
 
-std::vector<bool> NXTInstAggregateOperation::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstAggregateOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
   for(const auto &st : states) {
@@ -77,7 +77,7 @@ std::vector<bool> NXTInstAggregateOperation::operator()(const std::vector<Execut
   return checked;
 }
 
-std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstVectorOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
   for(const auto &st : states) {
@@ -92,11 +92,11 @@ std::vector<bool> NXTInstVectorOperation::operator()(const std::vector<Execution
   return checked;
 }
 
-NXTInstSwitchWithSym::NXTInstSwitchWithSym(Executor &_executor)
+NextInstSwitchWithSym::NextInstSwitchWithSym(Executor &_executor)
   : executor(_executor) {
 }
 
-std::vector<bool> NXTInstSwitchWithSym::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstSwitchWithSym::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
   for(const auto &st : states) {
@@ -117,11 +117,11 @@ std::vector<bool> NXTInstSwitchWithSym::operator()(const std::vector<ExecutionSt
   return checked;
 }
 
-NXTInstAllocaWithSym::NXTInstAllocaWithSym(Executor &_executor)
+NextInstAllocaWithSym::NextInstAllocaWithSym(Executor &_executor)
   : executor(_executor) {
 }
 
-std::vector<bool> NXTInstAllocaWithSym::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstAllocaWithSym::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
   for(const auto &st : states) {
@@ -151,11 +151,11 @@ std::vector<bool> NXTInstAllocaWithSym::operator()(const std::vector<ExecutionSt
   return checked;
 }
 
-NXTInstStoreWithSym::NXTInstStoreWithSym(Executor &_executor)
+NextInstStoreWithSym::NextInstStoreWithSym(Executor &_executor)
   : executor(_executor) {
 }
 
-std::vector<bool> NXTInstStoreWithSym::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstStoreWithSym::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
   for(const auto &st : states) {
@@ -177,11 +177,11 @@ std::vector<bool> NXTInstStoreWithSym::operator()(const std::vector<ExecutionSta
 }
 
 
-NXTInstIndirectBrWithSym::NXTInstIndirectBrWithSym(Executor &_executor)
+NextInstIndirectBrWithSym::NextInstIndirectBrWithSym(Executor &_executor)
   : executor(_executor) {
 }
 
-std::vector<bool> NXTInstIndirectBrWithSym::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> NextInstIndirectBrWithSym::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
 
   for(const auto &st : states) {

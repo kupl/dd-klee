@@ -17,52 +17,52 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states) = 0;
 };
 
-class NXTInstExternalFunctionCall : public Feature {
+class NextInstExternalFunctionCall : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class NXTInstFPOperation : public Feature {
+class NextInstFPOperation : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class NXTInstAggregateOperation : public Feature {
+class NextInstAggregateOperation : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class NXTInstVectorOperation : public Feature {
+class NextInstVectorOperation : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class NXTInstSwitchWithSym : public Feature {
+class NextInstSwitchWithSym : public Feature {
   Executor &executor;
 public:
-  NXTInstSwitchWithSym(Executor &_executor);
+  NextInstSwitchWithSym(Executor &_executor);
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class NXTInstAllocaWithSym : public Feature {
+class NextInstAllocaWithSym : public Feature {
   Executor &executor;
 public:
-  NXTInstAllocaWithSym(Executor &_executor);
+  NextInstAllocaWithSym(Executor &_executor);
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class NXTInstStoreWithSym : public Feature {
+class NextInstStoreWithSym : public Feature {
   Executor &executor;
 public:
-  NXTInstStoreWithSym(Executor &_executor);
+  NextInstStoreWithSym(Executor &_executor);
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class NXTInstIndirectBrWithSym : public Feature {
+class NextInstIndirectBrWithSym : public Feature {
   // NOTE: const reference type cannot call executor.toUnique
   Executor &executor;
 public:
-  NXTInstIndirectBrWithSym(Executor &_executor);
+  NextInstIndirectBrWithSym(Executor &_executor);
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 

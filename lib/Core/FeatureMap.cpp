@@ -19,14 +19,14 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   while (win >> weight)
     weights.push_back(weight);
   
-  features.push_back(new NXTInstExternalFunctionCall());
-  features.push_back(new NXTInstFPOperation());
-  features.push_back(new NXTInstAggregateOperation());
-  features.push_back(new NXTInstVectorOperation());
-  features.push_back(new NXTInstSwitchWithSym(executor));
-  features.push_back(new NXTInstAllocaWithSym(executor));
-  features.push_back(new NXTInstStoreWithSym(executor));
-  features.push_back(new NXTInstIndirectBrWithSym(executor));
+  features.push_back(new NextInstExternalFunctionCall());
+  features.push_back(new NextInstFPOperation());
+  features.push_back(new NextInstAggregateOperation());
+  features.push_back(new NextInstVectorOperation());
+  features.push_back(new NextInstSwitchWithSym(executor));
+  features.push_back(new NextInstAllocaWithSym(executor));
+  features.push_back(new NextInstStoreWithSym(executor));
+  features.push_back(new NextInstIndirectBrWithSym(executor));
 
   features.push_back(new SmallestInstructionStepped());
   features.push_back(new SmallestInstructionsSinceCovNew());

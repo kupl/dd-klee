@@ -92,10 +92,10 @@ class Executor : public Interpreter {
   friend class MergeHandler;
 
   // For features used by ParameterizedSearcher
-  friend class NXTInstSwitchWithSym;
-  friend class NXTInstIndirectBrWithSym;
-  friend class NXTInstAllocaWithSym;
-  friend class NXTInstStoreWithSym;
+  friend class NextInstSwitchWithSym;
+  friend class NextInstIndirectBrWithSym;
+  friend class NextInstAllocaWithSym;
+  friend class NextInstStoreWithSym;
 
 public:
   typedef std::pair<ExecutionState*,ExecutionState*> StatePair;
