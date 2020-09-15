@@ -151,6 +151,32 @@ std::vector<bool> NXTInstAllocaWithSym::operator()(const std::vector<ExecutionSt
   return checked;
 }
 
+NXTInstStoreWithSym::NXTInstStoreWithSym(Executor &_executor)
+  : executor(_executor) {
+}
+
+std::vector<bool> NXTInstStoreWithSym::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked;
+
+  for(const auto &st : states) {
+    KInstruction *ki = st->pc;
+    Instruction *i = ki->inst;
+    unsigned int opcode = i->getOpcode();
+
+    bool isStore = (opcode == Instruction::Store);
+    if(!isStore) {
+      checked.push_back(false);
+    } else {
+      ref<Expr> base = executor.eval(ki, 1, *st).value;
+      bool withSym = !(isa<ConstantExpr>(base));
+      checked.push_back(withSym);
+    }
+  }
+
+  return checked;
+}
+
+
 NXTInstIndirectBrWithSym::NXTInstIndirectBrWithSym(Executor &_executor)
   : executor(_executor) {
 }

@@ -95,6 +95,7 @@ class Executor : public Interpreter {
   friend class NXTInstSwitchWithSym;
   friend class NXTInstIndirectBrWithSym;
   friend class NXTInstAllocaWithSym;
+  friend class NXTInstStoreWithSym;
 
 public:
   typedef std::pair<ExecutionState*,ExecutionState*> StatePair;
