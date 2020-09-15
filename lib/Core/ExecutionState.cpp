@@ -71,6 +71,8 @@ ExecutionState::ExecutionState(KFunction *kf) :
 
     depth(0),
 
+    symBrCount(0),
+
     instsSinceCovNew(0),
     coveredNew(false),
     forkDisabled(false),
@@ -104,6 +106,7 @@ ExecutionState::ExecutionState(const ExecutionState& state):
 
     pathOS(state.pathOS),
     symPathOS(state.symPathOS),
+    symBrCount(state.symBrCount),
 
     instsSinceCovNew(state.instsSinceCovNew),
     coveredNew(state.coveredNew),

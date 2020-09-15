@@ -109,6 +109,16 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
+class SmallestNumOfSymbolicBranches : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
+class HighestNumOfSymbolicBranches : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
+};
+
 class LowestQueryCost : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);

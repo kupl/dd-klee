@@ -478,6 +478,59 @@ std::vector<bool> HighestNumOfSymExpr::operator()(const std::vector<ExecutionSta
 }
 
 // Features related to path condition
+std::vector<bool> SmallestNumOfSymbolicBranches::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with ascending order
+  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st: states) {
+    unsigned symBrCnt = st->symBrCount;
+    st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
+  }
+
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
+std::vector<bool> HighestNumOfSymbolicBranches::operator()(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> checked(states.size());
+
+  // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with descending order
+  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st: states) {
+    unsigned symBrCnt = st->symBrCount;
+    st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
+  }
+
+  // criterion: 10%
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * 0.1);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    checked[(it->second).second] = true;
+  }
+  for(auto it = boundary; it != st_set.cend(); it++) {
+    checked[(it->second).second] = false;
+  }
+
+  return checked;
+}
+
 std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 

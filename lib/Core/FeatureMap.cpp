@@ -39,6 +39,8 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   features.push_back(new HighestNumOfConstExpr());
   features.push_back(new HighestNumOfSymExpr());
 
+  features.push_back(new SmallestNumOfSymbolicBranches());
+  features.push_back(new HighestNumOfSymbolicBranches());
   features.push_back(new LowestQueryCost());
   features.push_back(new ShallowestState());
   features.push_back(new DeepestState());
