@@ -11,6 +11,7 @@
 
 #include "CoreStats.h"
 #include "Executor.h"
+#include "FeatureMap.h"
 #include "PTree.h"
 #include "StatsTracker.h"
 
@@ -468,4 +469,52 @@ void InterleavedSearcher::update(
   for (std::vector<Searcher*>::const_iterator it = searchers.begin(),
          ie = searchers.end(); it != ie; ++it)
     (*it)->update(current, addedStates, removedStates);
+}
+
+///
+
+ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile,
+                                             Executor &_executor)
+  : fv_map(states, weightFile, _executor) {
+}
+
+ParameterizedSearcher::~ParameterizedSearcher() {}
+ 
+void ParameterizedSearcher::extractFeatures() {
+  fv_map.updateMap(states);
+}
+
+ExecutionState &ParameterizedSearcher::selectState() {
+  assert(top && "score has not been caclculated!");
+  return *top;
+}
+
+void ParameterizedSearcher::update(
+    ExecutionState *current,
+    const std::vector<ExecutionState *> &addedStates,
+    const std::vector<ExecutionState *> &removedStates) {
+  states.insert(states.end(),
+                addedStates.begin(),
+                addedStates.end());
+  for (std::vector<ExecutionState *>::const_iterator it = removedStates.begin(),
+                                                     ie = removedStates.end();
+       it != ie; ++it) {
+    ExecutionState *es = *it;
+    bool ok = false;
+
+    for (std::vector<ExecutionState *>::const_iterator it = states.begin(),
+                                                      ie = states.end();
+         it != ie; ++it) {
+      if (es == *it) {
+        states.erase(it);
+        ok = true;
+        break;
+      }
+    }
+
+    assert(ok && "invalid state removed");
+  }
+
+  extractFeatures();
+  top = fv_map.getTop(states);
 }

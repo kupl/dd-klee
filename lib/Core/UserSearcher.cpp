@@ -48,7 +48,8 @@ cl::list<Searcher::CoreSearchType> CoreSearch(
                    "use NURS with Instr-Count"),
         clEnumValN(Searcher::NURS_CPICnt, "nurs:cpicnt",
                    "use NURS with CallPath-Instr-Count"),
-        clEnumValN(Searcher::NURS_QC, "nurs:qc", "use NURS with Query-Cost")
+        clEnumValN(Searcher::NURS_QC, "nurs:qc", "use NURS with Query-Cost"),
+        clEnumValN(Searcher::PARAM, "param", "use Parameterized Search")
             KLEE_LLVM_CL_VAL_END),
     cl::cat(SearchCat));
 
@@ -81,6 +82,12 @@ cl::opt<std::string> BatchTime(
     cl::init("5s"),
     cl::cat(SearchCat));
 
+/*** Weight options for parameterized searcher ***/
+cl::opt<std::string> Weight(
+		"weight",
+		cl::desc("Weight file for Parameterized Searcher"),
+		cl::cat(SearchCat));
+
 } // namespace
 
 void klee::initializeSearchOptions() {
@@ -105,7 +112,7 @@ bool klee::userSearcherRequiresMD2U() {
 }
 
 
-Searcher *getNewSearcher(Searcher::CoreSearchType type, Executor &executor) {
+Searcher *getNewSearcher(Searcher::CoreSearchType type, Executor &executor, const std::string &weightFile) {
   Searcher *searcher = NULL;
   switch (type) {
   case Searcher::DFS: searcher = new DFSSearcher(); break;
@@ -119,21 +126,28 @@ Searcher *getNewSearcher(Searcher::CoreSearchType type, Executor &executor) {
   case Searcher::NURS_ICnt: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::InstCount); break;
   case Searcher::NURS_CPICnt: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::CPInstCount); break;
   case Searcher::NURS_QC: searcher = new WeightedRandomSearcher(WeightedRandomSearcher::QueryCost); break;
+  case Searcher::PARAM: searcher = new ParameterizedSearcher(weightFile, executor); break;
   }
 
   return searcher;
 }
 
 Searcher *klee::constructUserSearcher(Executor &executor) {
+  
+  std::string weightFile;
+  if (!Weight.empty())
+    weightFile = Weight;
+  else
+    weightFile = "";
 
-  Searcher *searcher = getNewSearcher(CoreSearch[0], executor);
+  Searcher *searcher = getNewSearcher(CoreSearch[0], executor, weightFile);
 
   if (CoreSearch.size() > 1) {
     std::vector<Searcher *> s;
     s.push_back(searcher);
 
     for (unsigned i = 1; i < CoreSearch.size(); i++)
-      s.push_back(getNewSearcher(CoreSearch[i], executor));
+      s.push_back(getNewSearcher(CoreSearch[i], executor, weightFile));
 
     searcher = new InterleavedSearcher(s);
   }

@@ -15,6 +15,8 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include "FeatureMap.h"
+
 #include <map>
 #include <queue>
 #include <set>
@@ -81,7 +83,8 @@ namespace klee {
       NURS_RP,
       NURS_ICnt,
       NURS_CPICnt,
-      NURS_QC
+      NURS_QC,
+      PARAM
     };
   };
 
@@ -325,6 +328,27 @@ namespace klee {
     }
   };
 
+  class ParameterizedSearcher : public Searcher {
+    std::vector<ExecutionState*> states;
+    ExecutionState* top;
+
+    FeatureMap fv_map;
+    void extractFeatures();
+
+  public:
+    ParameterizedSearcher(const std::string &weightFile, Executor &_executor);
+    ~ParameterizedSearcher();
+
+    ExecutionState &selectState();
+    void update(ExecutionState *current,
+                const std::vector<ExecutionState*> &addedStates,
+                const std::vector<ExecutionState*> &removedStates);
+    bool empty() { return states.empty(); }
+    void printName(llvm::raw_ostream &os) {
+      os << "ParameterizedSearcher\n";
+    }
+
+  };
 }
 
 #endif /* KLEE_SEARCHER_H */
