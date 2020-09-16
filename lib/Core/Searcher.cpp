@@ -514,6 +514,11 @@ void ParameterizedSearcher::update(
 
     assert(ok && "invalid state removed");
   }
+	
+	if(states.size() == 1) {
+		top = states[0];
+		return;
+	}
 
   extractFeatures();
   top = fv_map.getTop(states);
