@@ -71,7 +71,7 @@ ExecutionState* FeatureMap::getTop(const std::vector<ExecutionState*> &states) {
   double topScore = -100000000;
   for(const auto &fvector : fv_map) {
     const auto &v = fvector.second;
-    double score = std::inner_product(v.begin(), v.end(), weights.begin(), 0);
+    double score = std::inner_product(v.begin(), v.end(), weights.begin(), 0.0);
     if (score > topScore) {
       topState = fvector.first;
       topScore = score;
