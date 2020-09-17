@@ -15,7 +15,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "FeatureMap.h"
+#include "FeatureHandler.h"
 
 #include <map>
 #include <queue>
@@ -332,7 +332,7 @@ namespace klee {
     std::vector<ExecutionState*> states;
     ExecutionState* top;
 
-    FeatureMap fv_map;
+    FeatureHandler f_handler;
     void extractFeatures();
 
   public:

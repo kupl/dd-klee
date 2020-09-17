@@ -11,7 +11,7 @@
 
 #include "CoreStats.h"
 #include "Executor.h"
-#include "FeatureMap.h"
+#include "FeatureHandler.h"
 #include "PTree.h"
 #include "StatsTracker.h"
 
@@ -475,13 +475,13 @@ void InterleavedSearcher::update(
 
 ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile,
                                              Executor &_executor)
-  : fv_map(states, weightFile, _executor) {
+  : f_handler(states, weightFile, _executor) {
 }
 
 ParameterizedSearcher::~ParameterizedSearcher() {}
  
 void ParameterizedSearcher::extractFeatures() {
-  fv_map.updateMap(states);
+  f_handler.updateMap(states);
 }
 
 ExecutionState &ParameterizedSearcher::selectState() {
@@ -521,5 +521,5 @@ void ParameterizedSearcher::update(
 	}
 
   extractFeatures();
-  top = fv_map.getTop(states);
+  top = f_handler.getTop(states);
 }
