@@ -493,6 +493,9 @@ void ParameterizedSearcher::update(
     ExecutionState *current,
     const std::vector<ExecutionState *> &addedStates,
     const std::vector<ExecutionState *> &removedStates) {
+
+  bool statesChanged = !(addedStates.empty() && removedStates.empty());
+
   states.insert(states.end(),
                 addedStates.begin(),
                 addedStates.end());
@@ -520,6 +523,8 @@ void ParameterizedSearcher::update(
 		return;
 	}
 
-  extractFeatures();
-  top = f_handler.getTop(states);
+  if(statesChanged) {
+    extractFeatures();
+    top = f_handler.getTop(states);
+  }
 }
