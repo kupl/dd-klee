@@ -84,7 +84,7 @@ namespace klee {
       NURS_ICnt,
       NURS_CPICnt,
       NURS_QC,
-      PARAM
+      Param
     };
   };
 
