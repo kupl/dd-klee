@@ -61,14 +61,13 @@ public:
 };
 
 class NextInstIndirectBrWithSym : public Feature {
-  // NOTE: const reference type cannot call executor.toUnique
   Executor &executor;
 public:
   NextInstIndirectBrWithSym(Executor &_executor);
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class SmallestInstructionStepped : public Feature {
+class SmallestInstructionsStepped : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
@@ -78,12 +77,12 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class SmallestCallPathInstruction : public Feature {
+class SmallestCallPathInstructions : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };
 
-class ClosestToUncoveredInst : public Feature {
+class ClosestToUncoveredInstruction : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
 };

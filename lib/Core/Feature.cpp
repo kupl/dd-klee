@@ -206,7 +206,7 @@ std::vector<bool> NextInstIndirectBrWithSym::operator()(const std::vector<Execut
 }
 
 // Features related to instruction history
-std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> SmallestInstructionsStepped::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 
   // (steppedInstructions, (ExecutionState*, index of state)) sorted by steppedInstructions
@@ -256,7 +256,7 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
   return checked;
 }
 
-std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> SmallestCallPathInstructions::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 
   // (CallPathInstructions, (ExecutionState*, index of state)) sorted by CallPathInstructions
@@ -282,7 +282,7 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
   return checked;
 }
 
-std::vector<bool> ClosestToUncoveredInst::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> ClosestToUncoveredInstruction::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 
   // (md2u, (ExecutionState*, index of state)) sorted by md2u
@@ -500,11 +500,11 @@ std::vector<bool> SmallestNumOfSymbolicBranches::operator()(const std::vector<Ex
   std::vector<bool> checked(states.size());
 
   // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with ascending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
   size_t i = 0;
   for(const auto &st: states) {
-    unsigned symBrCnt = st->symBrCount;
+    unsigned int symBrCnt = st->symBrCount;
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
@@ -525,12 +525,12 @@ std::vector<bool> HighestNumOfSymbolicBranches::operator()(const std::vector<Exe
   std::vector<bool> checked(states.size());
 
   // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with descending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>> st_set;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
 
   size_t i = 0;
   for(const auto &st: states) {
-    unsigned symBrCnt = st->symBrCount;
+    unsigned int symBrCnt = st->symBrCount;
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
