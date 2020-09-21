@@ -17,7 +17,7 @@ klee_add_component(kleeCore
   ExecutorUtil.cpp
   ExternalDispatcher.cpp
   Feature.cpp
-	FeatureMap.cpp
+  FeatureHandler.cpp
   ImpliedValue.cpp
   Memory.cpp
   MemoryManager.cpp

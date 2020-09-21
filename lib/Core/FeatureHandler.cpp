@@ -1,5 +1,5 @@
 
-#include "FeatureMap.h"
+#include "FeatureHandler.h"
 
 #include "klee/ExecutionState.h"
 
@@ -8,7 +8,7 @@
 #include <fstream>
 #include <vector>
 
-FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
+FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
                        const std::string &weightFile,
                        Executor &_executor)
   : executor(_executor) {
@@ -52,9 +52,9 @@ FeatureMap::FeatureMap(const std::vector<ExecutionState*> &states,
   assert(featureCount == (int)weights.size() && "weight size error");
 }
 
-FeatureMap::~FeatureMap() {}
+FeatureHandler::~FeatureHandler() {}
 
-void FeatureMap::updateMap(const std::vector<ExecutionState*> &states) {
+void FeatureHandler::updateMap(const std::vector<ExecutionState*> &states) {
   fv_map.clear();
   for(const auto f : features) {
     checkedStates = (*f)(states);
@@ -66,7 +66,7 @@ void FeatureMap::updateMap(const std::vector<ExecutionState*> &states) {
   }
 }
 
-ExecutionState* FeatureMap::getTop(const std::vector<ExecutionState*> &states) {
+ExecutionState* FeatureHandler::getTop(const std::vector<ExecutionState*> &states) {
   ExecutionState* topState = 0;
   double topScore = -100000000;
   for(const auto &fvector : fv_map) {
