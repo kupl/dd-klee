@@ -4,7 +4,7 @@ validate_build_config_klee() {
 
 setup_build_variables_klee() {
   KLEE_SUFFIX="${LLVM_VERSION_SHORT}${SOLVER_SUFFIX}${SANITIZER_SUFFIX}"
-  KLEE_BUILD_DIR="${BASE}/klee_build${KLEE_SUFFIX}"
+  KLEE_BUILD_DIR="${BASE}/${BUILD_DIR}${KLEE_SUFFIX}"
   KLEE_SRC="$DIR/../../"
 }
 
@@ -16,7 +16,6 @@ build_klee() {
   CMAKE_PREFIX_PATH=("")
 
   local CMAKE_ARGUMENTS=(
-    "-DLLVM_DIR=${LLVM_INSTALL}"
     "-DLLVM_CONFIG_BINARY=${LLVM_CONFIG}"
     "-DLLVMCC=${BITCODE_CC}"
     "-DLLVMCXX=${BITCODE_CXX}"
@@ -24,6 +23,7 @@ build_klee() {
     "-DENABLE_UNIT_TESTS=TRUE"
     "-DENABLE_SYSTEM_TESTS=TRUE"
     "-DLIT_ARGS=-v"
+		"-DENABLE_DOXYGEN=${ENABLE_DOXYGEN}"
   )
 
 

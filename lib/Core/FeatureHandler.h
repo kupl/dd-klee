@@ -1,6 +1,6 @@
 
-#ifndef KLEE_FEATUREMAP_H
-#define KLEE_FEATUREMAP_H
+#ifndef KLEE_FeatureHandler_H
+#define KLEE_FeatureHandler_H
 
 #include "klee/ExecutionState.h"
 
@@ -14,7 +14,7 @@ using namespace klee;
 namespace klee {
   class Executor;
 
-class FeatureMap {
+class FeatureHandler {
     Executor &executor;
     int featureCount;
     std::vector<Feature*> features;
@@ -23,14 +23,14 @@ class FeatureMap {
     std::vector<bool> checkedStates;
   
   public:
-    FeatureMap(const std::vector<ExecutionState*> &states,
+    FeatureHandler(const std::vector<ExecutionState*> &states,
                const std::string &weightFile,
                Executor &_executor);
-    ~FeatureMap();
+    ~FeatureHandler();
     void updateMap(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);
 };
 
 } // End klee namespace
 
-#endif /* KLEE_FEATUREMAP_H */
+#endif /* KLEE_FeatureHandler_H */
