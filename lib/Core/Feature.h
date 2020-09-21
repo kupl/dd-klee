@@ -13,6 +13,8 @@ namespace klee {
   class Executor;
 
 class Feature {
+protected:
+  static double criterion;
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states) = 0;
 };

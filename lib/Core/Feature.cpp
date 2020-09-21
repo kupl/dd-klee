@@ -19,6 +19,8 @@
 using namespace klee;
 using namespace llvm;
 
+double Feature::criterion = 0.1;
+
 // PARAM_TODO: categorize features and modularize calculation
 
 // Features related to next instruction
@@ -216,9 +218,8 @@ std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<Execu
     st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -242,9 +243,8 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
     st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -269,9 +269,8 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
     st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -296,9 +295,8 @@ std::vector<bool> ClosestToUncoveredInst::operator()(const std::vector<Execution
     st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -324,9 +322,8 @@ std::vector<bool> SmallestAddressSpace::operator()(const std::vector<ExecutionSt
     st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -352,9 +349,8 @@ std::vector<bool> LargestAddressSpace::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -379,9 +375,8 @@ std::vector<bool> SmallestSymbolics::operator()(const std::vector<ExecutionState
     st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -407,9 +402,8 @@ std::vector<bool> LargestSymbolics::operator()(const std::vector<ExecutionState*
     st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -448,9 +442,8 @@ std::vector<bool> HighestNumOfConstExpr::operator()(const std::vector<ExecutionS
     st_set.insert(std::make_pair(constCnt, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -489,9 +482,8 @@ std::vector<bool> HighestNumOfSymExpr::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(symCnt, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -516,9 +508,8 @@ std::vector<bool> SmallestNumOfSymbolicBranches::operator()(const std::vector<Ex
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -543,9 +534,8 @@ std::vector<bool> HighestNumOfSymbolicBranches::operator()(const std::vector<Exe
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -569,9 +559,8 @@ std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*>
     st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -595,9 +584,8 @@ std::vector<bool> ShallowestState::operator()(const std::vector<ExecutionState*>
     st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -622,9 +610,8 @@ std::vector<bool> DeepestState::operator()(const std::vector<ExecutionState*> &s
     st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -648,9 +635,8 @@ std::vector<bool> ShortestConstraints::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
