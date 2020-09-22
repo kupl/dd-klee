@@ -293,6 +293,7 @@ namespace {
 
 namespace klee {
 extern cl::opt<std::string> MaxTime;
+extern bool isParam;
 }
 
 /***/
@@ -1538,6 +1539,41 @@ int main(int argc, char **argv, char **envp) {
     << "KLEE: done: valid queries = " << queriesValid << "\n"
     << "KLEE: done: invalid queries = " << queriesInvalid << "\n"
     << "KLEE: done: query cex = " << queryCounterexamples << "\n";
+
+  if(isParam) {
+    uint64_t featureExtractions =
+      *theStatisticManager->getStatisticByName("FeatureExtractions");
+
+    uint64_t feature01 =
+      *theStatisticManager->getStatisticByName("Feature01");
+    uint64_t feature02 =
+      *theStatisticManager->getStatisticByName("Feature02");
+    uint64_t feature03 =
+      *theStatisticManager->getStatisticByName("Feature03");
+    uint64_t feature04 =
+      *theStatisticManager->getStatisticByName("Feature04");
+    uint64_t feature05 =
+      *theStatisticManager->getStatisticByName("Feature05");
+    uint64_t feature06 =
+      *theStatisticManager->getStatisticByName("Feature06");
+    uint64_t feature07 =
+      *theStatisticManager->getStatisticByName("Feature07");
+    uint64_t feature08 =
+      *theStatisticManager->getStatisticByName("Feature08");
+    
+    handler->getInfoStream()
+      << "\n"
+      << "KLEE: done: total feature extractions = " << featureExtractions << "\n"
+      << "== The marking counts during feature extraction === " << "\n"
+      << "Feature 01 = " << feature01 << "\n"
+      << "Feature 02 = " << feature02 << "\n"
+      << "Feature 03 = " << feature03 << "\n"
+      << "Feature 04 = " << feature04 << "\n"
+      << "Feature 05 = " << feature05 << "\n"
+      << "Feature 06 = " << feature06 << "\n"
+      << "Feature 07 = " << feature07 << "\n"
+      << "Feature 08 = " << feature08 << "\n";
+  }
 
   std::stringstream stats;
   stats << "\n";

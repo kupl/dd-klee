@@ -3,6 +3,7 @@
 #include "CoreStats.h"
 #include "Executor.h"
 #include "Feature.h"
+#include "FeatureStats.h"
 #include "StatsTracker.h"
 
 #include "klee/ExecutionState.h"
@@ -26,13 +27,16 @@ double Feature::criterion = 0.1;
 // Features related to next instruction
 std::vector<bool> NextInstExternalFunctionCall::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
-  
+  bool bvalue;
+
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
     
-    checked.push_back((opcode == Instruction::Invoke) || (opcode == Instruction::Call));
+    bvalue = (opcode == Instruction::Invoke) || (opcode == Instruction::Call);
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstExternalFunctionCall;
   }
 
   return checked;
@@ -40,24 +44,27 @@ std::vector<bool> NextInstExternalFunctionCall::operator()(const std::vector<Exe
 
 std::vector<bool> NextInstFPOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
+  bool bvalue;
 
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(opcode == Instruction::FAdd ||
-                      opcode == Instruction::FSub ||
-                      opcode == Instruction::FMul ||
-                      opcode == Instruction::FDiv ||
-                      opcode == Instruction::FRem ||
-                      opcode == Instruction::FPTrunc ||
-                      opcode == Instruction::FPExt ||
-                      opcode == Instruction::FPToUI ||
-                      opcode == Instruction::FPToSI ||
-                      opcode == Instruction::UIToFP ||
-                      opcode == Instruction::SIToFP ||
-                      opcode == Instruction::FCmp );
+    bvalue = opcode == Instruction::FAdd ||
+             opcode == Instruction::FSub ||
+             opcode == Instruction::FMul ||
+             opcode == Instruction::FDiv ||
+             opcode == Instruction::FRem ||
+             opcode == Instruction::FPTrunc ||
+             opcode == Instruction::FPExt ||
+             opcode == Instruction::FPToUI ||
+             opcode == Instruction::FPToSI ||
+             opcode == Instruction::UIToFP ||
+             opcode == Instruction::SIToFP ||
+             opcode == Instruction::FCmp;
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstFPOperation;
   }
 
   return checked;
@@ -65,15 +72,18 @@ std::vector<bool> NextInstFPOperation::operator()(const std::vector<ExecutionSta
 
 std::vector<bool> NextInstAggregateOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
+  bool bvalue;
 
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(opcode == Instruction::MemoryOps::GetElementPtr ||
-                      opcode == Instruction::InsertValue ||
-                      opcode == Instruction::ExtractValue );
+    bvalue = opcode == Instruction::MemoryOps::GetElementPtr ||
+             opcode == Instruction::InsertValue ||
+             opcode == Instruction::ExtractValue;
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstAggregateOperation;
   }
 
   return checked;
@@ -81,14 +91,17 @@ std::vector<bool> NextInstAggregateOperation::operator()(const std::vector<Execu
 
 std::vector<bool> NextInstVectorOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
+  bool bvalue;
 
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(opcode == Instruction::InsertElement ||
-                      opcode == Instruction::ExtractElement);
+    bvalue = opcode == Instruction::InsertElement ||
+             opcode == Instruction::ExtractElement;
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstVectorOperation;
   }
 
   return checked;
@@ -113,6 +126,7 @@ std::vector<bool> NextInstSwitchWithSym::operator()(const std::vector<ExecutionS
       ref<Expr> cond = executor.eval(ki, 0, *st).value;
       bool withSym = !(dyn_cast<ConstantExpr>(cond));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstSwitchWithSym;
     }
   }
 
@@ -147,6 +161,7 @@ std::vector<bool> NextInstAllocaWithSym::operator()(const std::vector<ExecutionS
       size = executor.toUnique(*st, size);
       bool withSym = !(dyn_cast<ConstantExpr>(size));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstAllocaWithSym;
     }
   }
 
@@ -172,6 +187,7 @@ std::vector<bool> NextInstStoreWithSym::operator()(const std::vector<ExecutionSt
       ref<Expr> base = executor.eval(ki, 1, *st).value;
       bool withSym = !(isa<ConstantExpr>(base));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstStoreWithSym;
     }
   }
 
@@ -199,6 +215,7 @@ std::vector<bool> NextInstIndirectBrWithSym::operator()(const std::vector<Execut
       address = executor.toUnique(*st, address);
       bool withSym = !(dyn_cast<ConstantExpr>(address.get()));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstIndirectBrWithSym;
     }
   }
 
