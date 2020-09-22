@@ -3,6 +3,7 @@
 #include "CoreStats.h"
 #include "Executor.h"
 #include "Feature.h"
+#include "FeatureStats.h"
 #include "StatsTracker.h"
 
 #include "klee/ExecutionState.h"
@@ -19,18 +20,23 @@
 using namespace klee;
 using namespace llvm;
 
+double Feature::criterion = 0.1;
+
 // PARAM_TODO: categorize features and modularize calculation
 
 // Features related to next instruction
 std::vector<bool> NextInstExternalFunctionCall::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
-  
+  bool bvalue;
+
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
     
-    checked.push_back((opcode == Instruction::Invoke) || (opcode == Instruction::Call));
+    bvalue = (opcode == Instruction::Invoke) || (opcode == Instruction::Call);
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstExternalFunctionCall;
   }
 
   return checked;
@@ -38,24 +44,27 @@ std::vector<bool> NextInstExternalFunctionCall::operator()(const std::vector<Exe
 
 std::vector<bool> NextInstFPOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
+  bool bvalue;
 
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(opcode == Instruction::FAdd ||
-                      opcode == Instruction::FSub ||
-                      opcode == Instruction::FMul ||
-                      opcode == Instruction::FDiv ||
-                      opcode == Instruction::FRem ||
-                      opcode == Instruction::FPTrunc ||
-                      opcode == Instruction::FPExt ||
-                      opcode == Instruction::FPToUI ||
-                      opcode == Instruction::FPToSI ||
-                      opcode == Instruction::UIToFP ||
-                      opcode == Instruction::SIToFP ||
-                      opcode == Instruction::FCmp );
+    bvalue = opcode == Instruction::FAdd ||
+             opcode == Instruction::FSub ||
+             opcode == Instruction::FMul ||
+             opcode == Instruction::FDiv ||
+             opcode == Instruction::FRem ||
+             opcode == Instruction::FPTrunc ||
+             opcode == Instruction::FPExt ||
+             opcode == Instruction::FPToUI ||
+             opcode == Instruction::FPToSI ||
+             opcode == Instruction::UIToFP ||
+             opcode == Instruction::SIToFP ||
+             opcode == Instruction::FCmp;
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstFPOperation;
   }
 
   return checked;
@@ -63,15 +72,18 @@ std::vector<bool> NextInstFPOperation::operator()(const std::vector<ExecutionSta
 
 std::vector<bool> NextInstAggregateOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
+  bool bvalue;
 
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(opcode == Instruction::MemoryOps::GetElementPtr ||
-                      opcode == Instruction::InsertValue ||
-                      opcode == Instruction::ExtractValue );
+    bvalue = opcode == Instruction::MemoryOps::GetElementPtr ||
+             opcode == Instruction::InsertValue ||
+             opcode == Instruction::ExtractValue;
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstAggregateOperation;
   }
 
   return checked;
@@ -79,14 +91,17 @@ std::vector<bool> NextInstAggregateOperation::operator()(const std::vector<Execu
 
 std::vector<bool> NextInstVectorOperation::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked;
+  bool bvalue;
 
   for(const auto &st : states) {
     KInstruction *ki = st->pc;
     Instruction *i = ki->inst;
     unsigned int opcode = i ->getOpcode();
 
-    checked.push_back(opcode == Instruction::InsertElement ||
-                      opcode == Instruction::ExtractElement);
+    bvalue = opcode == Instruction::InsertElement ||
+             opcode == Instruction::ExtractElement;
+    checked.push_back(bvalue);
+    if(bvalue) ++stats::nextInstVectorOperation;
   }
 
   return checked;
@@ -111,6 +126,7 @@ std::vector<bool> NextInstSwitchWithSym::operator()(const std::vector<ExecutionS
       ref<Expr> cond = executor.eval(ki, 0, *st).value;
       bool withSym = !(dyn_cast<ConstantExpr>(cond));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstSwitchWithSym;
     }
   }
 
@@ -145,6 +161,7 @@ std::vector<bool> NextInstAllocaWithSym::operator()(const std::vector<ExecutionS
       size = executor.toUnique(*st, size);
       bool withSym = !(dyn_cast<ConstantExpr>(size));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstAllocaWithSym;
     }
   }
 
@@ -170,6 +187,7 @@ std::vector<bool> NextInstStoreWithSym::operator()(const std::vector<ExecutionSt
       ref<Expr> base = executor.eval(ki, 1, *st).value;
       bool withSym = !(isa<ConstantExpr>(base));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstStoreWithSym;
     }
   }
 
@@ -197,6 +215,7 @@ std::vector<bool> NextInstIndirectBrWithSym::operator()(const std::vector<Execut
       address = executor.toUnique(*st, address);
       bool withSym = !(dyn_cast<ConstantExpr>(address.get()));
       checked.push_back(withSym);
+      if(withSym) ++stats::nextInstIndirectBrWithSym;
     }
   }
 
@@ -204,7 +223,7 @@ std::vector<bool> NextInstIndirectBrWithSym::operator()(const std::vector<Execut
 }
 
 // Features related to instruction history
-std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> SmallestInstructionsStepped::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 
   // (steppedInstructions, (ExecutionState*, index of state)) sorted by steppedInstructions
@@ -216,9 +235,8 @@ std::vector<bool> SmallestInstructionStepped::operator()(const std::vector<Execu
     st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -242,9 +260,8 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
     st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -256,7 +273,7 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
   return checked;
 }
 
-std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> SmallestCallPathInstructions::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 
   // (CallPathInstructions, (ExecutionState*, index of state)) sorted by CallPathInstructions
@@ -269,9 +286,8 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
     st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -283,7 +299,7 @@ std::vector<bool> SmallestCallPathInstruction::operator()(const std::vector<Exec
   return checked;
 }
 
-std::vector<bool> ClosestToUncoveredInst::operator()(const std::vector<ExecutionState*> &states) {
+std::vector<bool> ClosestToUncoveredInstruction::operator()(const std::vector<ExecutionState*> &states) {
   std::vector<bool> checked(states.size());
 
   // (md2u, (ExecutionState*, index of state)) sorted by md2u
@@ -296,9 +312,8 @@ std::vector<bool> ClosestToUncoveredInst::operator()(const std::vector<Execution
     st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -324,9 +339,8 @@ std::vector<bool> SmallestAddressSpace::operator()(const std::vector<ExecutionSt
     st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -352,9 +366,8 @@ std::vector<bool> LargestAddressSpace::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -379,9 +392,8 @@ std::vector<bool> SmallestSymbolics::operator()(const std::vector<ExecutionState
     st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -407,9 +419,8 @@ std::vector<bool> LargestSymbolics::operator()(const std::vector<ExecutionState*
     st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -448,9 +459,8 @@ std::vector<bool> HighestNumOfConstExpr::operator()(const std::vector<ExecutionS
     st_set.insert(std::make_pair(constCnt, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -489,9 +499,8 @@ std::vector<bool> HighestNumOfSymExpr::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(symCnt, std::make_pair(st, i++)));
   }
 
-  //criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -508,17 +517,16 @@ std::vector<bool> SmallestNumOfSymbolicBranches::operator()(const std::vector<Ex
   std::vector<bool> checked(states.size());
 
   // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with ascending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
   size_t i = 0;
   for(const auto &st: states) {
-    unsigned symBrCnt = st->symBrCount;
+    unsigned int symBrCnt = st->symBrCount;
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -534,18 +542,17 @@ std::vector<bool> HighestNumOfSymbolicBranches::operator()(const std::vector<Exe
   std::vector<bool> checked(states.size());
 
   // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with descending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>> st_set;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
 
   size_t i = 0;
   for(const auto &st: states) {
-    unsigned symBrCnt = st->symBrCount;
+    unsigned int symBrCnt = st->symBrCount;
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -569,9 +576,8 @@ std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*>
     st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -595,9 +601,8 @@ std::vector<bool> ShallowestState::operator()(const std::vector<ExecutionState*>
     st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -622,9 +627,8 @@ std::vector<bool> DeepestState::operator()(const std::vector<ExecutionState*> &s
     st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;
@@ -648,9 +652,8 @@ std::vector<bool> ShortestConstraints::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
   }
 
-  // criterion: 10%
   auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * 0.1);
+  std::advance(boundary, st_set.size() * criterion);
 
   for(auto it = st_set.cbegin(); it != boundary; it++) {
     checked[(it->second).second] = true;

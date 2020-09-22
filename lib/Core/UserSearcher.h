@@ -14,6 +14,8 @@ namespace klee {
   class Executor;
   class Searcher;
 
+  extern bool isParam;
+
   // XXX gross, should be on demand?
   bool userSearcherRequiresMD2U();
 

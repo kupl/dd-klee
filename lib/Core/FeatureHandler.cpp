@@ -28,10 +28,10 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
   features.push_back(new NextInstStoreWithSym(executor));
   features.push_back(new NextInstIndirectBrWithSym(executor));
 
-  features.push_back(new SmallestInstructionStepped());
+  features.push_back(new SmallestInstructionsStepped());
   features.push_back(new SmallestInstructionsSinceCovNew());
-  features.push_back(new SmallestCallPathInstruction());
-  features.push_back(new ClosestToUncoveredInst());
+  features.push_back(new SmallestCallPathInstructions());
+  features.push_back(new ClosestToUncoveredInstruction());
 
   features.push_back(new SmallestAddressSpace());
   features.push_back(new LargestAddressSpace());
