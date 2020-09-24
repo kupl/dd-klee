@@ -18,20 +18,11 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
   assert(win && "no weight file");
   while (win >> weight)
     weights.push_back(weight);
-  
-  features.push_back(new NextInstExternalFunctionCall());
-  features.push_back(new NextInstFPOperation());
-  features.push_back(new NextInstAggregateOperation());
-  features.push_back(new NextInstVectorOperation());
-  features.push_back(new NextInstSwitchWithSym(executor));
-  features.push_back(new NextInstAllocaWithSym(executor));
-  features.push_back(new NextInstStoreWithSym(executor));
-  features.push_back(new NextInstIndirectBrWithSym(executor));
 
-  features.push_back(new SmallestInstructionStepped());
+  features.push_back(new SmallestInstructionsStepped());
   features.push_back(new SmallestInstructionsSinceCovNew());
-  features.push_back(new SmallestCallPathInstruction());
-  features.push_back(new ClosestToUncoveredInst());
+  features.push_back(new SmallestCallPathInstructions());
+  features.push_back(new ClosestToUncoveredInstruction());
 
   features.push_back(new SmallestAddressSpace());
   features.push_back(new LargestAddressSpace());

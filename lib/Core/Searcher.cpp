@@ -12,6 +12,7 @@
 #include "CoreStats.h"
 #include "Executor.h"
 #include "FeatureHandler.h"
+#include "FeatureStats.h"
 #include "PTree.h"
 #include "StatsTracker.h"
 
@@ -524,6 +525,7 @@ void ParameterizedSearcher::update(
 	}
 
   if(statesChanged) {
+    ++stats::featureExtractions;
     extractFeatures();
     top = f_handler.getTop(states);
   }

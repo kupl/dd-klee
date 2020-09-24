@@ -303,6 +303,7 @@ namespace {
 
 namespace klee {
 extern cl::opt<std::string> MaxTime;
+extern bool isParam;
 }
 
 /***/
@@ -1554,6 +1555,16 @@ int main(int argc, char **argv, char **envp) {
     << "KLEE: done: query cex = " << queryCounterexamples << "\n";
 
   std::stringstream stats;
+
+  if(isParam) {
+    uint64_t featureExtractions =
+      *theStatisticManager->getStatisticByName("FeatureExtractions");
+
+    stats << "\n";
+    stats << "KLEE: done: total feature extractions = "
+          << featureExtractions << "\n";
+  }
+
   stats << "\n";
   stats << "KLEE: done: total instructions = "
         << instructions << "\n";
