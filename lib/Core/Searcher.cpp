@@ -523,13 +523,8 @@ void ParameterizedSearcher::update(
 		return;
 	}
 
-<<<<<<< HEAD
-  extractFeatures();
-  top = fv_map.getTop(states);
-=======
   if(statesChanged) {
     extractFeatures();
     top = f_handler.getTop(states);
   }
->>>>>>> a403f240ebd87cdd2bbd853d89138f838b3b739b
 }

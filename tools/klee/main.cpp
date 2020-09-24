@@ -62,6 +62,16 @@
 #include <iterator>
 #include <sstream>
 
+#include <time.h>
+
+const std::string currentTime() {
+  time_t now = time(0); 
+  struct tm tstruct;
+  char buf[80];
+  tstruct = *localtime(&now);
+  strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+  return buf;
+}
 
 using namespace llvm;
 using namespace klee;
@@ -1133,6 +1143,10 @@ linkWithUclibc(StringRef libDir,
 #endif
 
 int main(int argc, char **argv, char **envp) {
+  FILE *t = fopen("time_result", "a");
+  fprintf(t, "start: %s\n", currentTime().c_str());
+  fclose(t); 
+  
   atexit(llvm_shutdown);  // Call llvm_shutdown() on exit.
 
   KCommandLine::HideOptions(llvm::cl::GeneralCategory);
