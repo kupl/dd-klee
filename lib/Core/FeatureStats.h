@@ -10,16 +10,6 @@ namespace stats {
   /// Number of feature extraction by ParameterizedSearcher
   extern Statistic featureExtractions;
 
-  /// Number of mark of each feature when extracting features
-  extern Statistic nextInstExternalFunctionCall;
-  extern Statistic nextInstFPOperation;
-  extern Statistic nextInstAggregateOperation;
-  extern Statistic nextInstVectorOperation;
-  extern Statistic nextInstSwitchWithSym;
-  extern Statistic nextInstAllocaWithSym;
-  extern Statistic nextInstStoreWithSym;
-  extern Statistic nextInstIndirectBrWithSym;
-
 }
 }
 

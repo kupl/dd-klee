@@ -19,54 +19,6 @@ public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states) = 0;
 };
 
-class NextInstExternalFunctionCall : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
-class NextInstFPOperation : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
-class NextInstAggregateOperation : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
-class NextInstVectorOperation : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
-class NextInstSwitchWithSym : public Feature {
-  Executor &executor;
-public:
-  NextInstSwitchWithSym(Executor &_executor);
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
-class NextInstAllocaWithSym : public Feature {
-  Executor &executor;
-public:
-  NextInstAllocaWithSym(Executor &_executor);
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
-class NextInstStoreWithSym : public Feature {
-  Executor &executor;
-public:
-  NextInstStoreWithSym(Executor &_executor);
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
-class NextInstIndirectBrWithSym : public Feature {
-  Executor &executor;
-public:
-  NextInstIndirectBrWithSym(Executor &_executor);
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
-};
-
 class SmallestInstructionsStepped : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states);
