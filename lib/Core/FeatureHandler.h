@@ -20,7 +20,6 @@ class FeatureHandler {
     std::vector<Feature*> features;
     std::vector<double> weights;
     std::map<ExecutionState*, std::vector<int>> fv_map;
-    std::vector<bool> checkedStates;
   
   public:
     FeatureHandler(const std::vector<ExecutionState*> &states,

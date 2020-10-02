@@ -22,12 +22,25 @@ using namespace llvm;
 
 double Feature::criterion = 0.1;
 
-// PARAM_TODO: categorize features and modularize calculation
+template <typename T, typename Pred = std::less<std::pair<T, std::pair<ExecutionState*, size_t>>>>
+inline std::vector<bool> markFeature(
+    const std::set<std::pair<T, std::pair<ExecutionState*, size_t>>, Pred> &st_set,
+    std::vector<bool> &marked) {
+
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * Feature::criterion);
+
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    marked[(it->second).second] = true;
+  }
+
+  return marked;
+}
 
 // Features related to instruction history
-std::vector<bool> SmallestInstructionsStepped::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> SmallestInstructionsStepped::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (steppedInstructions, (ExecutionState*, index of state)) sorted by steppedInstructions
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
@@ -37,22 +50,12 @@ std::vector<bool> SmallestInstructionsStepped::operator()(const std::vector<Exec
     st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<uint64_t>(st_set, marked);
 }
 
-std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> SmallestInstructionsSinceCovNew::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (instsSinceCovNew, (ExecutionState*, index of state)) sorted by instsSinceCovNew
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
@@ -62,22 +65,12 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(const std::vector<
     st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<unsigned int>(st_set, marked);
 }
 
-std::vector<bool> SmallestCallPathInstructions::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> SmallestCallPathInstructions::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (CallPathInstructions, (ExecutionState*, index of state)) sorted by CallPathInstructions
   // CallPathInstruction: instructions in currently executing function
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
@@ -88,22 +81,12 @@ std::vector<bool> SmallestCallPathInstructions::operator()(const std::vector<Exe
     st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<uint64_t>(st_set, marked);
 }
 
-std::vector<bool> ClosestToUncoveredInstruction::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> ClosestToUncoveredInstruction::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (md2u, (ExecutionState*, index of state)) sorted by md2u
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
@@ -114,23 +97,13 @@ std::vector<bool> ClosestToUncoveredInstruction::operator()(const std::vector<Ex
     st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<uint64_t>(st_set, marked);
 }
 
 // Features related to symbolic memory state
-std::vector<bool> SmallestAddressSpace::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> SmallestAddressSpace::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (addressSpaceSize, (ExecutionState*, index of state)) stored by addressSpaceSize
   // with ascending order
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
@@ -141,22 +114,12 @@ std::vector<bool> SmallestAddressSpace::operator()(const std::vector<ExecutionSt
     st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<size_t>(st_set, marked);
 }
 
-std::vector<bool> LargestAddressSpace::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> LargestAddressSpace::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (addressSpaceSize, (ExecutionState*, index of state)) stored by addressSpaceSize
   // with descending order
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>,
@@ -168,22 +131,12 @@ std::vector<bool> LargestAddressSpace::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<size_t, std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-std::vector<bool> SmallestSymbolics::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> SmallestSymbolics::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (symbolics.size(), (ExecutionState*, index of state)) sorted by symbolics.size()
   // with ascending order 
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
@@ -194,22 +147,12 @@ std::vector<bool> SmallestSymbolics::operator()(const std::vector<ExecutionState
     st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<size_t>(st_set, marked);
 }
 
-std::vector<bool> LargestSymbolics::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> LargestSymbolics::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (symbolics.size(), (ExecutionState*, index of state)) sorted by symbolics.size()
   // with descending order 
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>,
@@ -221,22 +164,12 @@ std::vector<bool> LargestSymbolics::operator()(const std::vector<ExecutionState*
     st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<size_t, std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-std::vector<bool> HighestNumOfConstExpr::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> HighestNumOfConstExpr::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (constCnt, (ExecutionState*, index of state)) sorted by constCnt
   // with descending order
   // constCnt: the number of local variables mapped with concrete values;
@@ -261,22 +194,12 @@ std::vector<bool> HighestNumOfConstExpr::operator()(const std::vector<ExecutionS
     st_set.insert(std::make_pair(constCnt, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-std::vector<bool> HighestNumOfSymExpr::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> HighestNumOfSymExpr::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (symCnt, (ExecutionState*, index of state)) sorted by symCnt
   // with descending order 
   // symCnt: the number of local variables mapped with symbolic expressions
@@ -301,23 +224,13 @@ std::vector<bool> HighestNumOfSymExpr::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(symCnt, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
 // Features related to path condition
-std::vector<bool> SmallestNumOfSymbolicBranches::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> SmallestNumOfSymbolicBranches::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with ascending order
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
@@ -327,22 +240,12 @@ std::vector<bool> SmallestNumOfSymbolicBranches::operator()(const std::vector<Ex
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<unsigned int>(st_set, marked);
 }
 
-std::vector<bool> HighestNumOfSymbolicBranches::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> HighestNumOfSymbolicBranches::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with descending order
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
            std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
@@ -353,22 +256,12 @@ std::vector<bool> HighestNumOfSymbolicBranches::operator()(const std::vector<Exe
     st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> LowestQueryCost::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (queryCost, (ExecutionState*, index of state)) sorted by queryCost
   std::set<std::pair<double, std::pair<ExecutionState*, size_t>>> st_set;
 
@@ -378,22 +271,12 @@ std::vector<bool> LowestQueryCost::operator()(const std::vector<ExecutionState*>
     st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<double>(st_set, marked);
 }
 
-std::vector<bool> ShallowestState::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> ShallowestState::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (depth, (ExecutionState*, index of state)) sorted by depth with ascending order
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
@@ -403,22 +286,12 @@ std::vector<bool> ShallowestState::operator()(const std::vector<ExecutionState*>
     st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<unsigned int>(st_set, marked);
 }
 
-std::vector<bool> DeepestState::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> DeepestState::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (depth, (ExecutionState*, index of state)) sorted by depth with descending order
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
            std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
@@ -429,22 +302,12 @@ std::vector<bool> DeepestState::operator()(const std::vector<ExecutionState*> &s
     st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-std::vector<bool> ShortestConstraints::operator()(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> checked(states.size());
-
+std::vector<bool> ShortestConstraints::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
   // (constraintsSize, (ExecutionState*, index of state)) sorted by constraintsSize
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
 
@@ -454,15 +317,5 @@ std::vector<bool> ShortestConstraints::operator()(const std::vector<ExecutionSta
     st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
   }
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    checked[(it->second).second] = true;
-  }
-  for(auto it = boundary; it != st_set.cend(); it++) {
-    checked[(it->second).second] = false;
-  }
-
-  return checked;
+  return markFeature<size_t>(st_set, marked);
 }

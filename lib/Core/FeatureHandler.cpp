@@ -46,13 +46,14 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
 FeatureHandler::~FeatureHandler() {}
 
 void FeatureHandler::updateMap(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> marked(states.size(), false);
   fv_map.clear();
   for(const auto f : features) {
-    checkedStates = (*f)(states);
-    int statesCount = checkedStates.size();
+    (*f)(states, marked);
+    int statesCount = marked.size();
     assert(statesCount == (int)states.size() && "undesired behavior in feature extraction");
     for(int i = 0; i < statesCount; i++) {
-      fv_map[states[i]].push_back(checkedStates[i]);
+      fv_map[states[i]].push_back(marked[i]);
     }
   }
 }
