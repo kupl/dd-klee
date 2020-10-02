@@ -526,6 +526,8 @@ void ParameterizedSearcher::update(
 
   if(statesChanged) {
     ++stats::featureExtractions;
+    stats::addedStatesFE += addedStates.size();
+    stats::removedStatesFE += removedStates.size();
     extractFeatures();
     top = f_handler.getTop(states);
   }

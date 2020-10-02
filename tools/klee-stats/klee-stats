@@ -45,6 +45,9 @@ Legend = [
     ('TResolve(%)', 'time spent in object resolution wrt wall time', "ResolveTime"),
     ('QCexCMisses', 'Counterexample cache misses', "QueryCexCacheMisses"),
     ('QCexCHits', 'Counterexample cache hits', "QueryCexCacheHits"),
+    ('FeatureExtractions', 'number of feature extractions', 'FeatureExtractions'),
+    ('AddedStatesFE', 'total number of added states during feature extraction', 'AddedStatesFE'),
+    ('RemovedStatesFE', 'total number of removed states during feature extraction', 'RemovedStatesFE'),
 ]
 
 def getInfoFile(path):
@@ -126,6 +129,9 @@ def select_columns(record, pr):
     elif pr == 'more':
         s_column = ['Path', 'Instructions', 'WallTime', 'ICov', 'BCov', 'ICount',
                   'RelSolverTime', 'States', 'maxStates', 'MallocUsage', 'maxMem']
+    elif pr == 'param':
+        s_column = ['Path', 'Instructions', 'FeatureExtractions',
+                    'AddedStatesFE', 'RemovedStatesFE']
     else:
         s_column = ['Path', 'Instructions', 'WallTime', 'ICov',
                   'BCov', 'ICount', 'RelSolverTime']
@@ -456,6 +462,9 @@ def main():
                           action='store_true', dest='pMore',
                           help='Print extra information (needed when '
                           'monitoring an ongoing run).')
+    pControl.add_argument('--print-param-searcher-info',
+                          action='store_true', dest='pParam',
+                          help='Print statistics related to ParameterizedSearcher.')
 
     args = parser.parse_args()
 
@@ -470,6 +479,8 @@ def main():
         pr = 'abstime'
     elif args.pMore:
         pr = 'more'
+    elif args.pParam:
+        pr = 'param'
 
     dirs = getKleeOutDirs(args.dir)
     if len(dirs) == 0:
