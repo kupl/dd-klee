@@ -1,6 +1,6 @@
 
-#ifndef KLEE_FeatureHandler_H
-#define KLEE_FeatureHandler_H
+#ifndef KLEE_FEATUREHANDLER_H
+#define KLEE_FEATUREHANDLER_H
 
 #include "klee/ExecutionState.h"
 
@@ -33,4 +33,4 @@ class FeatureHandler {
 
 } // End klee namespace
 
-#endif /* KLEE_FeatureHandler_H */
+#endif /* KLEE_FEATUREHANDLER_H */

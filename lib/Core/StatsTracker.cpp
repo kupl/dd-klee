@@ -23,6 +23,7 @@
 #include "CallPathManager.h"
 #include "CoreStats.h"
 #include "Executor.h"
+#include "FeatureStats.h"
 #include "MemoryManager.h"
 #include "UserSearcher.h"
 
@@ -455,7 +456,10 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
 	           << "ArrayHashTime INTEGER,"
 #endif
-             << "QueryCexCacheHits INTEGER"
+             << "QueryCexCacheHits INTEGER,"
+             << "FeatureExtractions INTEGER,"
+             << "AddedStatesFE INTEGER,"
+             << "RemovedStatesFE INTEGER"
              << ")";
   char *zErrMsg = nullptr;
   if(sqlite3_exec(statsFile, create.str().c_str(), nullptr, nullptr, &zErrMsg)) {
@@ -491,7 +495,10 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
              << "ArrayHashTime,"
 #endif
-             << "QueryCexCacheHits "
+             << "QueryCexCacheHits ,"
+             << "FeatureExtractions ,"
+             << "AddedStatesFE ,"
+             << "RemovedStatesFE"
              << ") VALUES ( "
              << "?, "
              << "?, "
@@ -515,6 +522,9 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
              << "?, "
 #endif
+             << "?, "
+             << "?, "
+             << "?, "
              << "? "
              << ")";
 
@@ -548,6 +558,9 @@ void StatsTracker::writeStatsLine() {
   sqlite3_bind_int64(insertStmt, 18, stats::resolveTime);
   sqlite3_bind_int64(insertStmt, 19, stats::queryCexCacheMisses);
   sqlite3_bind_int64(insertStmt, 20, stats::queryCexCacheHits);
+  sqlite3_bind_int64(insertStmt, 21, stats::featureExtractions);
+  sqlite3_bind_int64(insertStmt, 22, stats::addedStatesFE);
+  sqlite3_bind_int64(insertStmt, 23, stats::removedStatesFE);
 #ifdef KLEE_ARRAY_DEBUG
   sqlite3_bind_int64(insertStmt, 21, stats::arrayHashTime);
 #endif
