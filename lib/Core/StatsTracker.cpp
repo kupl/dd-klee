@@ -71,6 +71,11 @@ cl::opt<bool> OutputIStats("output-istats", cl::init(true),
                                     "callgrind format (default=true)"),
                            cl::cat(StatsCat));
 
+cl::opt<bool> OutputFStats("output-fstats", cl::init(false),
+                           cl::desc("Write statistics on ExecutionState's features "
+                                    "used in ParameterizedSearcher (default=false)"),
+                           cl::cat(StatsCat));
+
 cl::opt<std::string> StatsWriteInterval(
     "stats-write-interval", cl::init("1s"),
     cl::desc("Approximate time between stats writes (default=1s)"),
@@ -101,6 +106,12 @@ cl::opt<unsigned> IStatsWriteAfterInstructions(
         "Write istats after each n instructions, 0 to disable (default=0)"),
     cl::cat(StatsCat));
 
+cl::opt<unsigned> FStatsWriteAfterFeatureExtractions(
+    "stats-write-after-feature-extractions", cl::init(0),
+    cl::desc(
+        "Write fstats after each n feature extractions, 0 to disable (default=0)"),
+    cl::cat(StatsCat));
+
 // XXX I really would like to have dynamic rate control for something like this.
 cl::opt<std::string> UncoveredUpdateInterval(
     "uncovered-update-interval", cl::init("30s"),
@@ -117,11 +128,15 @@ cl::opt<bool> UseCallPaths("use-call-paths", cl::init(true),
 ///
 
 bool StatsTracker::useStatistics() {
-  return OutputStats || OutputIStats;
+  return OutputStats || OutputIStats || OutputFStats;
 }
 
 bool StatsTracker::useIStats() {
   return OutputIStats;
+}
+
+bool StatsTracker::useFStats() {
+  return OutputFStats;
 }
 
 /// Check for special cases where we statically know an instruction is
@@ -290,6 +305,52 @@ StatsTracker::StatsTracker(Executor &_executor, std::string _objectFilename,
       klee_error("Unable to open instruction level stats file (run.istats).");
     }
   }
+
+  if (OutputFStats) {
+    sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);
+    sqlite3_enable_shared_cache(0);
+
+    // open database
+    auto db_filename = executor.interpreterHandler->getOutputFilename("feature.stats");
+    if (sqlite3_open(db_filename.c_str(), &fstatsFile) != SQLITE_OK) {
+      std::ostringstream errorstream;
+      errorstream << "Can't open database: " << sqlite3_errmsg(fstatsFile);
+      sqlite3_close(fstatsFile);
+      klee_error("%s", errorstream.str().c_str());
+    }
+
+    // prepare statements
+    if (sqlite3_prepare_v2(fstatsFile, "BEGIN TRANSACTION", -1, &transactionBeginStmtOnFStats, nullptr) != SQLITE_OK) {
+      klee_error("Cannot create prepared statement: %s", sqlite3_errmsg(fstatsFile));
+    }
+
+    if (sqlite3_prepare_v2(fstatsFile, "END TRANSACTION", -1, &transactionEndStmtOnFStats, nullptr) != SQLITE_OK) {
+      klee_error("Cannot create prepared statement: %s", sqlite3_errmsg(fstatsFile));
+    }
+
+    // set options
+    char *zErrMsg;
+    if (sqlite3_exec(fstatsFile, "PRAGMA synchronous = OFF", nullptr, nullptr, &zErrMsg) != SQLITE_OK) {
+      klee_error("%s", sqlite3ErrToStringAndFree("Can't set options for database: ", zErrMsg).c_str());
+    }
+
+    // note: we use WAL here a) for speed and b) to prevent creation of new file descriptors (as with TRUNCATE)
+    if (sqlite3_exec(fstatsFile, "PRAGMA journal_mode = WAL", nullptr, nullptr, &zErrMsg) != SQLITE_OK) {
+      klee_error("%s", sqlite3ErrToStringAndFree("Can't set options for database: ", zErrMsg).c_str());
+    }
+
+    // create table
+    writeFStatsHeader();
+
+    // begin transaction
+    auto rc = sqlite3_step(transactionBeginStmtOnFStats);
+    if (rc != SQLITE_DONE) {
+      klee_warning("Can't begin transaction: %s", sqlite3_errmsg(fstatsFile));
+    }
+    sqlite3_reset(transactionBeginStmtOnFStats);
+
+    writeFStatsLine();
+  }
 }
 
 StatsTracker::~StatsTracker() {  
@@ -304,11 +365,26 @@ StatsTracker::~StatsTracker() {
     sqlite3_finalize(insertStmt);
     sqlite3_close(statsFile);
   }
+
+  if (fstatsFile) {
+    auto rc = sqlite3_step(transactionEndStmtOnFStats);
+    if (rc != SQLITE_DONE) {
+      klee_warning("Can't commit transaction: %s", sqlite3_errmsg(fstatsFile));
+    }
+    sqlite3_reset(transactionEndStmtOnFStats);
+    sqlite3_finalize(transactionBeginStmtOnFStats);
+    sqlite3_finalize(transactionEndStmtOnFStats);
+    sqlite3_finalize(insertStmtOnFStats);
+    sqlite3_close(fstatsFile);
+  }
 }
 
 void StatsTracker::done() {
   if (statsFile)
     writeStatsLine();
+
+  if (fstatsFile)
+    writeFStatsLine();
 
   if (OutputIStats) {
     if (updateMinDistToUncovered)
@@ -371,6 +447,12 @@ void StatsTracker::stepInstruction(ExecutionState &es) {
   if (istatsFile && IStatsWriteAfterInstructions &&
       stats::instructions % IStatsWriteAfterInstructions.getValue() == 0)
     writeIStats();
+}
+
+void StatsTracker::extractFeatures() {
+  if (fstatsFile && FStatsWriteAfterFeatureExtractions &&
+      stats::featureExtractions % FStatsWriteAfterFeatureExtractions.getValue() == 0)
+    writeFStatsLine();
 }
 
 ///
@@ -456,10 +538,7 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
 	           << "ArrayHashTime INTEGER,"
 #endif
-             << "QueryCexCacheHits INTEGER,"
-             << "FeatureExtractions INTEGER,"
-             << "AddedStatesFE INTEGER,"
-             << "RemovedStatesFE INTEGER"
+             << "QueryCexCacheHits INTEGER"
              << ")";
   char *zErrMsg = nullptr;
   if(sqlite3_exec(statsFile, create.str().c_str(), nullptr, nullptr, &zErrMsg)) {
@@ -493,12 +572,9 @@ void StatsTracker::writeStatsHeader() {
              << "ResolveTime ,"
              << "QueryCexCacheMisses ,"
 #ifdef KLEE_ARRAY_DEBUG
-             << "ArrayHashTime,"
+             << "ArrayHashTime, "
 #endif
-             << "QueryCexCacheHits ,"
-             << "FeatureExtractions ,"
-             << "AddedStatesFE ,"
-             << "RemovedStatesFE"
+             << "QueryCexCacheHits"
              << ") VALUES ( "
              << "?, "
              << "?, "
@@ -522,14 +598,83 @@ void StatsTracker::writeStatsHeader() {
 #ifdef KLEE_ARRAY_DEBUG
              << "?, "
 #endif
-             << "?, "
-             << "?, "
-             << "?, "
              << "? "
              << ")";
 
   if(sqlite3_prepare_v2(statsFile, insert.str().c_str(), -1, &insertStmt, nullptr) != SQLITE_OK) {
     klee_error("Cannot create prepared statement: %s", sqlite3_errmsg(statsFile));
+  }
+}
+
+void StatsTracker::writeFStatsHeader() {
+  std::ostringstream create, insert;
+  create << "CREATE TABLE stats ";
+  create     << "(FeatureExtractions INTEGER,"
+             << "FEFork INTEGER,"
+             << "FETermination INTEGER,"
+             << "FECall INTEGER,"
+             << "FEReturn INTEGER,"
+             << "URInstsStepped INTEGER,"
+             << "URInstsSinceCovNew INTEGER,"
+             << "URCPInsts INTEGER,"
+             << "URMD2U INTEGER,"
+             << "URAddrSpace INTEGER,"
+             << "URSymbolics INTEGER,"
+             << "URConcreteExprCnt INTEGER,"
+             << "URSymExprCnt INTEGER,"
+             << "URQC INTEGER,"
+             << "URDepth INTEGER,"
+             << "URConstraints INTEGER"
+             << ")";
+  char *zErrMsg = nullptr;
+  if(sqlite3_exec(fstatsFile, create.str().c_str(), nullptr, nullptr, &zErrMsg)) {
+    klee_error("%s", sqlite3ErrToStringAndFree("ERROR creating table: ", zErrMsg).c_str());
+  }
+  /* Sometimes KLEE runs out of file descriptors and hence we try to a) keep important fds open and b) prevent the
+   * creation of temporary files. SQLite3 uses temporary files for statement journals, which help rollbacks when
+   * constraints are violated. We have no constraints in our table so there shouldn't be a constraint violation.
+   * `OR FAIL` will not write to temp files and therefore not rollback but simply fail. As said before this should not
+   * happen, but if it does this statement will fail with SQLITE_CONSTRAINT error. If this happens you should either
+   * remove the constraints or consider using `IGNORE` mode.
+   */
+  insert << "INSERT OR FAIL INTO stats ( "
+             << "FeatureExtractions, "
+             << "FEFork ,"
+             << "FETermination ,"
+             << "FECall ,"
+             << "FEReturn, "
+             << "URInstsStepped, "
+             << "URInstsSinceCovNew, "
+             << "URCPInsts, "
+             << "URMD2U, "
+             << "URAddrSpace, "
+             << "URSymbolics, "
+             << "URConcreteExprCnt, "
+             << "URSymExprCnt, "
+             << "URQC, "
+             << "URDepth, "
+             << "URConstraints"
+             << ") VALUES ( "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?, "
+             << "?"
+             << ")";
+
+  if(sqlite3_prepare_v2(fstatsFile, insert.str().c_str(), -1, &insertStmtOnFStats, nullptr) != SQLITE_OK) {
+    klee_error("Cannot create prepared statement: %s", sqlite3_errmsg(fstatsFile));
   }
 }
 
@@ -558,9 +703,6 @@ void StatsTracker::writeStatsLine() {
   sqlite3_bind_int64(insertStmt, 18, stats::resolveTime);
   sqlite3_bind_int64(insertStmt, 19, stats::queryCexCacheMisses);
   sqlite3_bind_int64(insertStmt, 20, stats::queryCexCacheHits);
-  sqlite3_bind_int64(insertStmt, 21, stats::featureExtractions);
-  sqlite3_bind_int64(insertStmt, 22, stats::addedStatesFE);
-  sqlite3_bind_int64(insertStmt, 23, stats::removedStatesFE);
 #ifdef KLEE_ARRAY_DEBUG
   sqlite3_bind_int64(insertStmt, 21, stats::arrayHashTime);
 #endif
@@ -578,6 +720,41 @@ void StatsTracker::writeStatsLine() {
     sqlite3_reset(transactionBeginStmt);
 
     statsWriteCount = 0;
+  }
+}
+
+void StatsTracker::writeFStatsLine() {
+  sqlite3_bind_int64(insertStmtOnFStats, 1, stats::featureExtractions);
+  sqlite3_bind_int64(insertStmtOnFStats, 2, stats::featureExtractionFork);
+  sqlite3_bind_int64(insertStmtOnFStats, 3, stats::featureExtractionTermination);
+  sqlite3_bind_int64(insertStmtOnFStats, 4, stats::featureExtractionCall);
+  sqlite3_bind_int64(insertStmtOnFStats, 5, stats::featureExtractionReturn);
+  sqlite3_bind_int64(insertStmtOnFStats, 6, stats::uniqueRatioInstsStepped);
+  sqlite3_bind_int64(insertStmtOnFStats, 7, stats::uniqueRatioInstsSinceCovNew);
+  sqlite3_bind_int64(insertStmtOnFStats, 8, stats::uniqueRatioCPInsts);
+  sqlite3_bind_int64(insertStmtOnFStats, 9, stats::uniqueRatioMD2U);
+  sqlite3_bind_int64(insertStmtOnFStats, 10, stats::uniqueRatioAddrSpace);
+  sqlite3_bind_int64(insertStmtOnFStats, 11, stats::uniqueRatioSymbolics);
+  sqlite3_bind_int64(insertStmtOnFStats, 12, stats::uniqueRatioConcreteExprCount);
+  sqlite3_bind_int64(insertStmtOnFStats, 13, stats::uniqueRatioSymbolicExprCount);
+  sqlite3_bind_int64(insertStmtOnFStats, 14, stats::uniqueRatioQC);
+  sqlite3_bind_int64(insertStmtOnFStats, 15, stats::uniqueRatioDepth);
+  sqlite3_bind_int64(insertStmtOnFStats, 16, stats::uniqueRatioConstraints);
+
+  int errCode = sqlite3_step(insertStmtOnFStats);
+  if(errCode != SQLITE_DONE) klee_error("Error writing stats data: %s", sqlite3_errmsg(fstatsFile));
+  sqlite3_reset(insertStmtOnFStats);
+
+  fstatsWriteCount++;
+  if(fstatsWriteCount == fstatsCommitEvery) {
+    errCode = sqlite3_step(transactionEndStmtOnFStats);
+    if (errCode != SQLITE_DONE) klee_warning("Transaction commit error: %s", sqlite3_errmsg(fstatsFile));
+    sqlite3_reset(transactionEndStmtOnFStats);
+    errCode = sqlite3_step(transactionBeginStmtOnFStats);
+    if (errCode != SQLITE_DONE) klee_warning("Transaction begin error: %s", sqlite3_errmsg(fstatsFile));
+    sqlite3_reset(transactionBeginStmtOnFStats);
+
+    fstatsWriteCount = 0;
   }
 }
 

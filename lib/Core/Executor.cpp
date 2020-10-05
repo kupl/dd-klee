@@ -1455,6 +1455,7 @@ void Executor::executeCall(ExecutionState &state,
     KFunction *kf = kmodule->functionMap[f];
 
     state.pushFrame(state.prevPC, kf);
+    state.stackPushed = true;
     state.pc = kf->instructions;
 
     if (statsTracker)
@@ -1640,6 +1641,7 @@ void Executor::executeInstruction(ExecutionState &state, KInstruction *ki) {
       terminateStateOnExit(state);
     } else {
       state.popFrame();
+      state.stackPopped = true;
 
       if (statsTracker)
         statsTracker->framePopped(state);
