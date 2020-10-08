@@ -1107,9 +1107,7 @@ Executor::fork(ExecutionState &current, ref<Expr> condition, bool isInternal) {
       falseState->symPathOS = symPathWriter->open(current.symPathOS);
       if (!isInternal) {
         trueState->symPathOS << "1";
-        trueState->symBrCount++;
         falseState->symPathOS << "0";
-        falseState->symBrCount++;
       }
     }
 

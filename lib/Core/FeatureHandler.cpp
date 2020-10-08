@@ -20,9 +20,13 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
     weights.push_back(weight);
 
   features.push_back(new SmallestInstructionsStepped());
+  features.push_back(new LargestInstructionsStepped());
   features.push_back(new SmallestInstructionsSinceCovNew());
+  features.push_back(new LargestInstructionsSinceCovNew());
   features.push_back(new SmallestCallPathInstructions());
+  features.push_back(new LargestCallPathInstructions());
   features.push_back(new ClosestToUncoveredInstruction());
+  features.push_back(new FarthestToUncoveredInstruction());
 
   features.push_back(new SmallestAddressSpace());
   features.push_back(new LargestAddressSpace());
@@ -31,12 +35,12 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
   features.push_back(new HighestNumOfConstExpr());
   features.push_back(new HighestNumOfSymExpr());
 
-  features.push_back(new SmallestNumOfSymbolicBranches());
-  features.push_back(new HighestNumOfSymbolicBranches());
   features.push_back(new LowestQueryCost());
+  features.push_back(new HighestQueryCost());
   features.push_back(new ShallowestState());
   features.push_back(new DeepestState());
   features.push_back(new ShortestConstraints());
+  features.push_back(new LongestConstraints());
 
   featureCount = features.size();
 

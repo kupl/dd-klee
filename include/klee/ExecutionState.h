@@ -113,9 +113,6 @@ public:
   /// taken to reach/create this state
   TreeOStream symPathOS;
 
-  /// @brief the number of symbolic branches taken to reach/create this state
-  unsigned symBrCount;
-
   /// @brief Counts how many instructions were executed since the last new
   /// instruction was covered.
   unsigned instsSinceCovNew;
