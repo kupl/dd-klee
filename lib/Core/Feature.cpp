@@ -42,7 +42,25 @@ std::vector<bool> SmallestInstructionsStepped::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (steppedInstructions, (ExecutionState*, index of state)) sorted by steppedInstructions
+  // with ascending order
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    uint64_t steppedInstructions = st->steppedInstructions;
+    st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
+  }
+
+  return markFeature<uint64_t>(st_set, marked);
+}
+
+std::vector<bool> LargestInstructionsStepped::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (steppedInstructions, (ExecutionState*, index of state)) sorted by steppedInstructions
+  // with descending order
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>>> st_set;
 
   size_t i = 0;
   for(const auto &st : states) {
@@ -57,7 +75,25 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (instsSinceCovNew, (ExecutionState*, index of state)) sorted by instsSinceCovNew
+  // with ascending order
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    unsigned int instsSinceCovNew = st->instsSinceCovNew;
+    st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
+  }
+
+  return markFeature<unsigned int>(st_set, marked);
+}
+
+std::vector<bool> LargestInstructionsSinceCovNew::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (instsSinceCovNew, (ExecutionState*, index of state)) sorted by instsSinceCovNew
+  // with descending order
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
 
   size_t i = 0;
   for(const auto &st : states) {
@@ -72,8 +108,27 @@ std::vector<bool> SmallestCallPathInstructions::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (CallPathInstructions, (ExecutionState*, index of state)) sorted by CallPathInstructions
+  // with ascending order
   // CallPathInstruction: instructions in currently executing function
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    uint64_t CPInsts = st->stack.back().callPathNode->statistics.getValue(stats::instructions);
+    st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
+  }
+
+  return markFeature<uint64_t>(st_set, marked);
+}
+
+std::vector<bool> LargestCallPathInstructions::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (CallPathInstructions, (ExecutionState*, index of state)) sorted by CallPathInstructions
+  // with descending order
+  // CallPathInstruction: instructions in currently executing function
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>>> st_set;
 
   size_t i = 0;
   for(const auto &st : states) {
@@ -88,7 +143,26 @@ std::vector<bool> ClosestToUncoveredInstruction::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (md2u, (ExecutionState*, index of state)) sorted by md2u
+  // with ascending order
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    StackFrame &sf = st->stack.back();
+    uint64_t md2u = computeMinDistToUncovered(st->pc, sf.minDistToUncoveredOnReturn);
+    st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
+  }
+
+  return markFeature<uint64_t>(st_set, marked);
+}
+
+std::vector<bool> FarthestToUncoveredInstruction::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (md2u, (ExecutionState*, index of state)) sorted by md2u
+  // with descending order
+  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>>> st_set;
 
   size_t i = 0;
   for(const auto &st : states) {
@@ -227,42 +301,11 @@ std::vector<bool> HighestNumOfSymExpr::operator()(
   return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-// Features related to path condition
-std::vector<bool> SmallestNumOfSymbolicBranches::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with ascending order
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
-
-  size_t i = 0;
-  for(const auto &st: states) {
-    unsigned int symBrCnt = st->symBrCount;
-    st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
-  }
-
-  return markFeature<unsigned int>(st_set, marked);
-}
-
-std::vector<bool> HighestNumOfSymbolicBranches::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (symBrCnt, (ExecutionState*, index of state)) sorted by symBrCnt with descending order
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
-
-  size_t i = 0;
-  for(const auto &st: states) {
-    unsigned int symBrCnt = st->symBrCount;
-    st_set.insert(std::make_pair(symBrCnt, std::make_pair(st, i++)));
-  }
-
-  return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
-}
-
 std::vector<bool> LowestQueryCost::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (queryCost, (ExecutionState*, index of state)) sorted by queryCost
+  // with ascending order
   std::set<std::pair<double, std::pair<ExecutionState*, size_t>>> st_set;
 
   size_t i = 0;
@@ -274,6 +317,22 @@ std::vector<bool> LowestQueryCost::operator()(
   return markFeature<double>(st_set, marked);
 }
 
+std::vector<bool> HighestQueryCost::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (queryCost, (ExecutionState*, index of state)) sorted by queryCost
+  // with descending order
+  std::set<std::pair<double, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<double, std::pair<ExecutionState*, size_t>>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    double qc = st->queryCost.toSeconds();
+    st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
+  }
+
+  return markFeature<double>(st_set, marked);
+}
 std::vector<bool> ShallowestState::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
@@ -309,7 +368,25 @@ std::vector<bool> ShortestConstraints::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (constraintsSize, (ExecutionState*, index of state)) sorted by constraintsSize
+  // with ascending order
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    size_t constraintsSize = st->constraints.size();
+    st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
+  }
+
+  return markFeature<size_t>(st_set, marked);
+}
+
+std::vector<bool> LongestConstraints::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (constraintsSize, (ExecutionState*, index of state)) sorted by constraintsSize
+  // with descending order
+  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>> st_set;
 
   size_t i = 0;
   for(const auto &st : states) {
