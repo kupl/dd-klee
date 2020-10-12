@@ -1,5 +1,10 @@
 
+#include "ConstraintFeature.h"
+#include "Executor.h"
 #include "FeatureHandler.h"
+#include "InstructionFeature.h"
+#include "StatsTracker.h"
+#include "SymMemoryFeature.h"
 
 #include "klee/ExecutionState.h"
 
@@ -9,9 +14,7 @@
 #include <vector>
 
 FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
-                       const std::string &weightFile,
-                       Executor &_executor)
-  : executor(_executor) {
+                       const std::string &weightFile) {
   double weight;
   std::ifstream win(weightFile.c_str());
 
@@ -49,7 +52,7 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
 
 FeatureHandler::~FeatureHandler() {}
 
-void FeatureHandler::updateMap(const std::vector<ExecutionState*> &states) {
+void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states) {
   std::vector<bool> marked(states.size(), false);
   fv_map.clear();
   for(const auto f : features) {

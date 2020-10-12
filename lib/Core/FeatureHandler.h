@@ -15,7 +15,6 @@ namespace klee {
   class Executor;
 
 class FeatureHandler {
-    Executor &executor;
     int featureCount;
     std::vector<Feature*> features;
     std::vector<double> weights;
@@ -23,10 +22,9 @@ class FeatureHandler {
   
   public:
     FeatureHandler(const std::vector<ExecutionState*> &states,
-               const std::string &weightFile,
-               Executor &_executor);
+               const std::string &weightFile);
     ~FeatureHandler();
-    void updateMap(const std::vector<ExecutionState*> &states);
+    void extractFeatures(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);
 };
 

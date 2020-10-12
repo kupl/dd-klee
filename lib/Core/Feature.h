@@ -4,13 +4,11 @@
 
 #include "klee/ExecutionState.h"
 
-#include <map>
 #include <vector>
 
 using namespace klee;
 
 namespace klee {
-  class Executor;
 
 class Feature {
 public:
@@ -19,125 +17,20 @@ public:
                                        std::vector<bool> &marked) = 0;
 };
 
-class SmallestInstructionsStepped : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
+template <typename T, typename Pred = std::less<std::pair<T, std::pair<ExecutionState*, size_t>>>>
+inline std::vector<bool> markFeature(
+    const std::set<std::pair<T, std::pair<ExecutionState*, size_t>>, Pred> &st_set,
+    std::vector<bool> &marked) {
 
-class LargestInstructionsStepped : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
+  auto boundary = st_set.cbegin();
+  std::advance(boundary, st_set.size() * Feature::criterion);
 
-class SmallestInstructionsSinceCovNew : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
+  for(auto it = st_set.cbegin(); it != boundary; it++) {
+    marked[(it->second).second] = true;
+  }
 
-class LargestInstructionsSinceCovNew : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class SmallestCallPathInstructions : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class LargestCallPathInstructions : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class ClosestToUncoveredInstruction : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class FarthestToUncoveredInstruction : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class SmallestAddressSpace : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class LargestAddressSpace : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class SmallestSymbolics : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class LargestSymbolics : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class HighestNumOfConstExpr : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class HighestNumOfSymExpr : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class LowestQueryCost : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class HighestQueryCost : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class ShallowestState : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class DeepestState : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class ShortestConstraints : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class LongestConstraints : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
+  return marked;
+}
 
 } // End klee namespace
 

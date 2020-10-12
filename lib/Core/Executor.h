@@ -87,6 +87,7 @@ class Executor : public Interpreter {
   friend class RandomPathSearcher;
   friend class OwningSearcher;
   friend class WeightedRandomSearcher;
+  friend class ParameterizedSearcher;
   friend class SpecialFunctionHandler;
   friend class StatsTracker;
   friend class MergeHandler;
