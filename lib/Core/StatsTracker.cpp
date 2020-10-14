@@ -107,7 +107,7 @@ cl::opt<unsigned> IStatsWriteAfterInstructions(
     cl::cat(StatsCat));
 
 cl::opt<unsigned> FStatsWriteAfterFeatureExtractions(
-    "stats-write-after-feature-extractions", cl::init(0),
+    "fstats-write-after-feature-extractions", cl::init(0),
     cl::desc(
         "Write fstats after each n feature extractions, 0 to disable (default=0)"),
     cl::cat(StatsCat));

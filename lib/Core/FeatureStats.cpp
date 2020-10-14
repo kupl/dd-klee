@@ -4,6 +4,10 @@
 using namespace klee;
 
 Statistic stats::featureExtractions("FeatureExtractions", "FE");
+Statistic stats::featureExtractionFork("FeatureExtractionFork", "FEFork");
+Statistic stats::featureExtractionTermination("FeatureExtractionTermination", "FETermination");
+Statistic stats::featureExtractionCall("FeatureExtractionCall", "FECall");
+Statistic stats::featureExtractionReturn("FeatureExtractionReturn", "FEReturn");
 
 Statistic stats::uniqueRatioInstsStepped("UniqueRationInstsStepped", "URInstsStepped");
 Statistic stats::uniqueRatioInstsSinceCovNew("UniqueRationInstsSinceCovNew", "URInstsSinceCovNew");
@@ -17,7 +21,3 @@ Statistic stats::uniqueRatioSymBrCount("UniqueRatioSymBrCount", "URSymBrCnt");
 Statistic stats::uniqueRatioQC("UniqueRatioQC", "URQC");
 Statistic stats::uniqueRatioDepth("UniqueRatioDepth", "URDepth");
 Statistic stats::uniqueRatioConstraints("UniqueRatioConstraints", "URConstraints");
-Statistic stats::featureExtractionFork("FeatureExtractionFork", "FEFork");
-Statistic stats::featureExtractionTermination("FeatureExtractionTermination", "FETermination");
-Statistic stats::featureExtractionCall("FeatureExtractionCall", "FECall");
-Statistic stats::featureExtractionReturn("FeatureExtractionReturn", "FEReturn");
