@@ -69,9 +69,10 @@ ExecutionState::ExecutionState(KFunction *kf) :
     pc(kf->instructions),
     prevPC(pc),
 
-    depth(0),
+    stackPopped(false),
+    stackPushed(false),
 
-    symBrCount(0),
+    depth(0),
 
     instsSinceCovNew(0),
     coveredNew(false),
@@ -96,6 +97,8 @@ ExecutionState::ExecutionState(const ExecutionState& state):
     pc(state.pc),
     prevPC(state.prevPC),
     stack(state.stack),
+    stackPopped(state.stackPopped),
+    stackPushed(state.stackPushed),
     incomingBBIndex(state.incomingBBIndex),
 
     addressSpace(state.addressSpace),
@@ -106,7 +109,6 @@ ExecutionState::ExecutionState(const ExecutionState& state):
 
     pathOS(state.pathOS),
     symPathOS(state.symPathOS),
-    symBrCount(state.symBrCount),
 
     instsSinceCovNew(state.instsSinceCovNew),
     coveredNew(state.coveredNew),

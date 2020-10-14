@@ -1,5 +1,10 @@
 
+#include "ConstraintFeature.h"
+#include "Executor.h"
 #include "FeatureHandler.h"
+#include "InstructionFeature.h"
+#include "StatsTracker.h"
+#include "SymMemoryFeature.h"
 
 #include "klee/ExecutionState.h"
 
@@ -9,9 +14,7 @@
 #include <vector>
 
 FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
-                       const std::string &weightFile,
-                       Executor &_executor)
-  : executor(_executor) {
+                       const std::string &weightFile) {
   double weight;
   std::ifstream win(weightFile.c_str());
 
@@ -20,9 +23,13 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
     weights.push_back(weight);
 
   features.push_back(new SmallestInstructionsStepped());
+  features.push_back(new LargestInstructionsStepped());
   features.push_back(new SmallestInstructionsSinceCovNew());
+  features.push_back(new LargestInstructionsSinceCovNew());
   features.push_back(new SmallestCallPathInstructions());
+  features.push_back(new LargestCallPathInstructions());
   features.push_back(new ClosestToUncoveredInstruction());
+  features.push_back(new FarthestToUncoveredInstruction());
 
   features.push_back(new SmallestAddressSpace());
   features.push_back(new LargestAddressSpace());
@@ -31,12 +38,12 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
   features.push_back(new HighestNumOfConstExpr());
   features.push_back(new HighestNumOfSymExpr());
 
-  features.push_back(new SmallestNumOfSymbolicBranches());
-  features.push_back(new HighestNumOfSymbolicBranches());
   features.push_back(new LowestQueryCost());
+  features.push_back(new HighestQueryCost());
   features.push_back(new ShallowestState());
   features.push_back(new DeepestState());
   features.push_back(new ShortestConstraints());
+  features.push_back(new LongestConstraints());
 
   featureCount = features.size();
 
@@ -45,14 +52,15 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
 
 FeatureHandler::~FeatureHandler() {}
 
-void FeatureHandler::updateMap(const std::vector<ExecutionState*> &states) {
+void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states) {
+  std::vector<bool> marked(states.size(), false);
   fv_map.clear();
   for(const auto f : features) {
-    checkedStates = (*f)(states);
-    int statesCount = checkedStates.size();
+    (*f)(states, marked);
+    int statesCount = marked.size();
     assert(statesCount == (int)states.size() && "undesired behavior in feature extraction");
     for(int i = 0; i < statesCount; i++) {
-      fv_map[states[i]].push_back(checkedStates[i]);
+      fv_map[states[i]].push_back(marked[i]);
     }
   }
 }

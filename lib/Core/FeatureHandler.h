@@ -1,6 +1,6 @@
 
-#ifndef KLEE_FeatureHandler_H
-#define KLEE_FeatureHandler_H
+#ifndef KLEE_FEATUREHANDLER_H
+#define KLEE_FEATUREHANDLER_H
 
 #include "klee/ExecutionState.h"
 
@@ -15,22 +15,19 @@ namespace klee {
   class Executor;
 
 class FeatureHandler {
-    Executor &executor;
     int featureCount;
     std::vector<Feature*> features;
     std::vector<double> weights;
     std::map<ExecutionState*, std::vector<int>> fv_map;
-    std::vector<bool> checkedStates;
   
   public:
     FeatureHandler(const std::vector<ExecutionState*> &states,
-               const std::string &weightFile,
-               Executor &_executor);
+               const std::string &weightFile);
     ~FeatureHandler();
-    void updateMap(const std::vector<ExecutionState*> &states);
+    void extractFeatures(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);
 };
 
 } // End klee namespace
 
-#endif /* KLEE_FeatureHandler_H */
+#endif /* KLEE_FEATUREHANDLER_H */

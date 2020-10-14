@@ -45,6 +45,22 @@ Legend = [
     ('TResolve(%)', 'time spent in object resolution wrt wall time', "ResolveTime"),
     ('QCexCMisses', 'Counterexample cache misses', "QueryCexCacheMisses"),
     ('QCexCHits', 'Counterexample cache hits', "QueryCexCacheHits"),
+    ('FeatureExtractions', 'number of feature extractions', 'FeatureExtractions'),
+    ('FEFork', 'number of feature extractions by fork', 'FeatureExtractionFork'),
+    ('FETermination', 'number of feature extractions by termination', 'FeatureExtractionTermination'),
+    ('FECall', 'number of feature extractions by call', 'FeatureExtractionCall'),
+    ('FEReturn', 'number of feature extractions by return', 'FeatureExtractionReturn'),
+    ('URInstsStepped(%)', 'average ratio of unique InstsStepped value in states space', 'UniqueCountInstsStepped'),
+    ('URInstsSinceCovNew(%)', 'average ratio of unique InstsSinceCovNew value in states space', 'UniqueCountInstsSinceCovNew'),
+    ('URCPInsts(%)', 'average ratio of unique CPInsts value in states space', 'UniqueCountCPInsts'),
+    ('URMD2U(%)', 'average ratio of unique MD2U value in states space', 'UniqueCountMD2U'),
+    ('URAddrSpace(%)', 'average ratio of unique AddrSpaceSize value in states space', 'UniqueCountAddrSpace'),
+    ('URSymbolics(%)', 'average ratio of unique SymbolicsSize value in states space', 'UniqueCountSymbolics'),
+    ('URConcreteExprCnt(%)', 'average ratio of unique ConcreteExprCnt value in states space', 'UniqueCountConcreteExprCnt'),
+    ('URSymExprCnt(%)', 'average ratio of unique SymExprCnt value in states space', 'UniqueCountSymExprCnt'),
+    ('URQC(%)', 'average ratio of unique QC value in states space', 'UniqueCountQC'),
+    ('URDepth(%)', 'average ratio of unique Depth value in states space', 'UniqueCountDepth'),
+    ('URConstraints(%)', 'average ratio of unique ConstraintsLength value in states space', 'UniqueCountConstraints')
 ]
 
 def getInfoFile(path):
@@ -54,6 +70,10 @@ def getInfoFile(path):
 def getLogFile(path):
     """Return the path to run.stats."""
     return os.path.join(path, 'run.stats')
+
+def getFStatsFile(path):
+    """Return the path to feature.stats."""
+    return os.path.join(path, 'feature.stats')
 
 class LazyEvalList:
     """Store all the lines in run.stats and eval() when needed."""
@@ -126,6 +146,11 @@ def select_columns(record, pr):
     elif pr == 'more':
         s_column = ['Path', 'Instructions', 'WallTime', 'ICov', 'BCov', 'ICount',
                   'RelSolverTime', 'States', 'maxStates', 'MallocUsage', 'maxMem']
+    elif pr == 'fstats':
+        s_column = ['Path', 'FeatureExtractions', 'FEFork', 'FETermination',
+                    'FECall', 'FEReturn', 'URInstsStepped', 'URInstsSinceCovNew',
+                    'URCPInsts', 'URMD2U', 'URAddrSpace', 'URSymbolics', 'URConcreteExprCnt',
+                    'URSymExprCnt', 'URQC', 'URDepth', 'URConstraints']
     else:
         s_column = ['Path', 'Instructions', 'WallTime', 'ICov',
                   'BCov', 'ICount', 'RelSolverTime']
@@ -174,6 +199,32 @@ def add_artificial_columns(record):
     for key in ["SolverTime", "CexCacheTime", "ForkTime", "ResolveTime", "UserTime"]:
         if "WallTime" in record and key in record:
             record["Rel"+key] = 100 * record[key] / record["WallTime"]
+
+    # Calculate unique ratio of statistical values used in feature extraction
+    if "FeatureExtractions" in record and record["FeatureExtractions"] != 0:
+        feature_extractions = record["FeatureExtractions"]
+        if "URInstsStepped" in record:
+            record["URInstsStepped"] = record["URInstsStepped"] / feature_extractions
+        if "URInstsSinceCovNew" in record:
+            record["URInstsSinceCovNew"] = record["URInstsSinceCovNew"] / feature_extractions
+        if "URCPInsts" in record:
+            record["URCPInsts"] = record["URCPInsts"] / feature_extractions
+        if "URMD2U" in record:
+            record["URMD2U"] = record["URMD2U"] / feature_extractions
+        if "URAddrSpace" in record:
+            record["URAddrSpace"] = record["URAddrSpace"] / feature_extractions
+        if "URSymbolics" in record:
+            record["URSymbolics"] = record["URSymbolics"] / feature_extractions
+        if "URConcreteExprCnt" in record:
+            record["URConcreteExprCnt"] = record["URConcreteExprCnt"] / feature_extractions
+        if "URSymExprCnt" in record:
+            record["URSymExprCnt"] = record["URSymExprCnt"] / feature_extractions
+        if "URQC" in record:
+            record["URQC"] = record["URQC"] / feature_extractions
+        if "URDepth" in record:
+            record["URDepth"] = record["URDepth"] / feature_extractions
+        if "URConstraints" in record:
+            record["URConstraints"] = record["URConstraints"] / feature_extractions
 
     return record
 
@@ -285,7 +336,7 @@ def rename_columns(row, name_mapping):
     return row
 
 
-def write_table(args, data, dirs, pr):
+def print_table(args, data, table, pr):
     from tabulate import TableFormat, Line, DataRow, tabulate
 
     KleeTable = TableFormat(lineabove=Line("-", "-", "-", "-"),
@@ -296,6 +347,28 @@ def write_table(args, data, dirs, pr):
                             datarow=DataRow("|", "|", "|"),
                             padding=0,
                             with_header_hide=None)
+
+    if args.tableFormat != 'klee':
+        print(tabulate(
+            table, headers='keys',
+            tablefmt=args.tableFormat,
+            floatfmt='.{p}f'.format(p=2),
+            numalign='right', stralign='center'))
+    else:
+        stream = tabulate(
+            table, headers='keys',
+            tablefmt=KleeTable,
+            floatfmt='.{p}f'.format(p=2),
+            numalign='right', stralign='center')
+        # add a line separator before the total line
+        if len(data) > 1:
+            stream = stream.splitlines()
+            stream.insert(-2, stream[-1])
+            stream = '\n'.join(stream)
+        print(stream)
+
+
+def write_table(args, data, dirs, pr):
 
     if len(data) > 1:
         dirs = stripCommonPathPrefix(dirs)
@@ -380,24 +453,21 @@ def write_table(args, data, dirs, pr):
     table = final_table
 
     # Output table
-    if args.tableFormat != 'klee':
-        print(tabulate(
-            table, headers='keys',
-            tablefmt=args.tableFormat,
-            floatfmt='.{p}f'.format(p=2),
-            numalign='right', stralign='center'))
+    if pr =='fstats':
+        fe_keys = ('Path', 'FeatureExtractions', 'FEFork',
+                    'FETermination', 'FECall', 'FEReturn')
+        ur_keys = ('Path', 'URInstsStepped', 'URInstsSinceCovNew', 'URCPInsts',
+                   'URMD2U', 'URAddrSpace', 'URSymbolics', 'URConcreteExprCnt',
+                   'URSymExprCnt', 'URQC', 'URDepth', 'URConstraints')
+        
+        fe_table = {k: table[k] for k in fe_keys}
+        ur_table = {k: table[k] for k in ur_keys}
+        print_table(args, data, fe_table, pr)
+        print('\n')
+        print_table(args, data, ur_table, pr)
+
     else:
-        stream = tabulate(
-            table, headers='keys',
-            tablefmt=KleeTable,
-            floatfmt='.{p}f'.format(p=2),
-            numalign='right', stralign='center')
-        # add a line separator before the total line
-        if len(data) > 1:
-            stream = stream.splitlines()
-            stream.insert(-2, stream[-1])
-            stream = '\n'.join(stream)
-        print(stream)
+        print_table(args, data, table, pr)
 
 
 def main():
@@ -424,7 +494,6 @@ def main():
                               choices=['klee'] + list(_table_formats.keys()),
                               dest='tableFormat', default='klee',
                               help='Table format for the summary.')
-
     parser.add_argument('--to-csv',
                           action='store_true', dest='toCsv',
                           help='Output stats as comma-separated values (CSV)')
@@ -456,6 +525,9 @@ def main():
                           action='store_true', dest='pMore',
                           help='Print extra information (needed when '
                           'monitoring an ongoing run).')
+    pControl.add_argument('--print-fstats',
+                          action='store_true', dest='pFStats',
+                          help='Print fstats generated by ParameterizedSearcher')
 
     args = parser.parse_args()
 
@@ -470,6 +542,8 @@ def main():
         pr = 'abstime'
     elif args.pMore:
         pr = 'more'
+    elif args.pFStats:
+        pr = 'fstats'
 
     dirs = getKleeOutDirs(args.dir)
     if len(dirs) == 0:
@@ -480,10 +554,13 @@ def main():
       return grafana(dirs, args.grafana_host, args.grafana_port)
 
     # Filter non-existing files, useful for star operations
-    valid_log_files = [getLogFile(f) for f in dirs if os.path.isfile(getLogFile(f))]
+    if pr == 'fstats':
+        valid_files = [getFStatsFile(f) for f in dirs if os.path.isfile(getFStatsFile(f))]
+    else:
+        valid_files = [getLogFile(f) for f in dirs if os.path.isfile(getLogFile(f))]
 
     # read contents from every run.stats file into LazyEvalList
-    data = [LazyEvalList(d) for d in valid_log_files]
+    data = [LazyEvalList(d) for d in valid_files]
 
     if args.toCsv:
         write_csv(data)

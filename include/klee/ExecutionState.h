@@ -85,6 +85,12 @@ public:
   /// @brief Stack representing the current instruction stream
   stack_ty stack;
 
+  /// @brief whether previous instruction is function call
+  bool stackPopped;
+
+  /// @brief whether previous instruction is return
+  bool stackPushed;
+
   /// @brief Remember from which Basic Block control flow arrived
   /// (i.e. to select the right phi values)
   unsigned incomingBBIndex;
@@ -112,9 +118,6 @@ public:
   /// @brief History of symbolic path: represents symbolic branches
   /// taken to reach/create this state
   TreeOStream symPathOS;
-
-  /// @brief the number of symbolic branches taken to reach/create this state
-  unsigned symBrCount;
 
   /// @brief Counts how many instructions were executed since the last new
   /// instruction was covered.

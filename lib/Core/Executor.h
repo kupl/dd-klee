@@ -87,15 +87,10 @@ class Executor : public Interpreter {
   friend class RandomPathSearcher;
   friend class OwningSearcher;
   friend class WeightedRandomSearcher;
+  friend class ParameterizedSearcher;
   friend class SpecialFunctionHandler;
   friend class StatsTracker;
   friend class MergeHandler;
-
-  // For features used by ParameterizedSearcher
-  friend class NextInstSwitchWithSym;
-  friend class NextInstIndirectBrWithSym;
-  friend class NextInstAllocaWithSym;
-  friend class NextInstStoreWithSym;
 
 public:
   typedef std::pair<ExecutionState*,ExecutionState*> StatePair;

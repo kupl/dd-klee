@@ -10,6 +10,7 @@ klee_add_component(kleeCore
   AddressSpace.cpp
   MergeHandler.cpp
   CallPathManager.cpp
+  ConstraintFeature.cpp
   Context.cpp
   CoreStats.cpp
   ExecutionState.cpp
@@ -20,6 +21,7 @@ klee_add_component(kleeCore
   FeatureHandler.cpp
   FeatureStats.cpp
   ImpliedValue.cpp
+  InstructionFeature.cpp
   Memory.cpp
   MemoryManager.cpp
   PTree.cpp
@@ -27,6 +29,7 @@ klee_add_component(kleeCore
   SeedInfo.cpp
   SpecialFunctionHandler.cpp
   StatsTracker.cpp
+  SymMemoryFeature.cpp
   TimingSolver.cpp
   UserSearcher.cpp
 )
