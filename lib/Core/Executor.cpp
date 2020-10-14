@@ -2953,12 +2953,10 @@ void Executor::run(ExecutionState &initialState) {
   std::vector<ExecutionState *> newStates(states.begin(), states.end());
   searcher->update(0, newStates, std::vector<ExecutionState *>());
 
-  int scnt=0;
   while (!states.empty() && !haltExecution) {
     ExecutionState &state = searcher->selectState();
     KInstruction *ki = state.pc;
     stepInstruction(state);
-    scnt=scnt+1;
     executeInstruction(state, ki);
     timers.invoke();
     if (::dumpStates) dumpStates();
@@ -2971,9 +2969,6 @@ void Executor::run(ExecutionState &initialState) {
 
   delete searcher;
   searcher = 0;
-  FILE *mf = fopen("state_data", "a");
-  fprintf(mf, "# of Selection: %d\n", scnt); 
-  fclose(mf); 
 
   doDumpStates();
 }
