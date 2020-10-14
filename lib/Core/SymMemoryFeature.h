@@ -36,7 +36,19 @@ public:
                                        std::vector<bool> &marked);
 };
 
+class SmallestNumOfConstExpr : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
+                                       std::vector<bool> &marked);
+};
+
 class HighestNumOfConstExpr : public Feature {
+public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
+                                       std::vector<bool> &marked);
+};
+
+class SmallestNumOfSymExpr : public Feature {
 public:
   virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
                                        std::vector<bool> &marked);

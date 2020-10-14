@@ -35,7 +35,9 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
   features.push_back(new LargestAddressSpace());
   features.push_back(new SmallestSymbolics());
   features.push_back(new LargestSymbolics());
+  features.push_back(new SmallestNumOfConstExpr());
   features.push_back(new HighestNumOfConstExpr());
+  features.push_back(new SmallestNumOfSymExpr());
   features.push_back(new HighestNumOfSymExpr());
 
   features.push_back(new LowestQueryCost());

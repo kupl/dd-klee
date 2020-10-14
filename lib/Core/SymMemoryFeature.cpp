@@ -88,14 +88,13 @@ std::vector<bool> LargestSymbolics::operator()(
   return markFeature<size_t, std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-std::vector<bool> HighestNumOfConstExpr::operator()(
+std::vector<bool> SmallestNumOfConstExpr::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (constCnt, (ExecutionState*, index of state)) sorted by constCnt
-  // with descending order
+  // with ascending order
   // constCnt: the number of local variables mapped with concrete values;
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
   std::set<unsigned int> val_set;
 
@@ -120,17 +119,46 @@ std::vector<bool> HighestNumOfConstExpr::operator()(
 
   stats::uniqueRatioConcreteExprCount += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
+  return markFeature<unsigned int, std::less<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+}
+
+std::vector<bool> HighestNumOfConstExpr::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (constCnt, (ExecutionState*, index of state)) sorted by constCnt
+  // with descending order
+  // constCnt: the number of local variables mapped with concrete values;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    unsigned int constCnt = 0;
+    for(auto &sf : st->stack) {
+      unsigned int numRegisters = sf.kf->numRegisters;
+      Cell *locals = sf.locals;
+
+      for(unsigned int i = 0; i < numRegisters; i++) {
+        ref<Expr> value = (locals + i) -> value;
+        if(!value.get())
+          continue;
+        if(isa<ConstantExpr>(value))
+          constCnt++;
+      }
+    }
+    st_set.insert(std::make_pair(constCnt, std::make_pair(st, i++)));
+  }
+
   return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
-std::vector<bool> HighestNumOfSymExpr::operator()(
+std::vector<bool> SmallestNumOfSymExpr::operator()(
     const std::vector<ExecutionState*> &states,
     std::vector<bool> &marked) {
   // (symCnt, (ExecutionState*, index of state)) sorted by symCnt
-  // with descending order 
+  // with ascending order 
   // symCnt: the number of local variables mapped with symbolic expressions
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
   std::set<unsigned int> val_set;
 
@@ -154,6 +182,37 @@ std::vector<bool> HighestNumOfSymExpr::operator()(
   }
 
   stats::uniqueRatioSymbolicExprCount += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
+
+  return markFeature<unsigned int, std::less<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+}
+
+
+std::vector<bool> HighestNumOfSymExpr::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (symCnt, (ExecutionState*, index of state)) sorted by symCnt
+  // with descending order 
+  // symCnt: the number of local variables mapped with symbolic expressions
+  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    unsigned int symCnt = 0;
+    for(auto &sf : st->stack) {
+      unsigned int numRegisters = sf.kf->numRegisters;
+      Cell *locals = sf.locals;
+
+      for(unsigned int i = 0; i < numRegisters; i++) {
+        ref<Expr> value = (locals + i) -> value;
+        if(!value.get())
+          continue;
+        if(!isa<ConstantExpr>(value))
+          symCnt++;
+      }
+    }
+    st_set.insert(std::make_pair(symCnt, std::make_pair(st, i++)));
+  }
 
   return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
