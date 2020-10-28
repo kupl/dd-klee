@@ -48,7 +48,7 @@ std::vector<bool> LargestInstructionsStepped::operator()(
     st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
   }
 
-  return markFeature<uint64_t>(st_set, marked);
+  return markFeature<uint64_t, std::greater<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
 std::vector<bool> SmallestInstructionsSinceCovNew::operator()(
@@ -86,7 +86,7 @@ std::vector<bool> LargestInstructionsSinceCovNew::operator()(
     st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
   }
 
-  return markFeature<unsigned int>(st_set, marked);
+  return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
 std::vector<bool> SmallestCallPathInstructions::operator()(
@@ -126,7 +126,7 @@ std::vector<bool> LargestCallPathInstructions::operator()(
     st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
   }
 
-  return markFeature<uint64_t>(st_set, marked);
+  return markFeature<uint64_t, std::greater<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
 std::vector<bool> ClosestToUncoveredInstruction::operator()(
@@ -166,5 +166,5 @@ std::vector<bool> FarthestToUncoveredInstruction::operator()(
     st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
   }
 
-  return markFeature<uint64_t>(st_set, marked);
+  return markFeature<uint64_t, std::greater<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }

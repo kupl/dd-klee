@@ -30,7 +30,7 @@ std::vector<bool> SmallestAddressSpace::operator()(
 
   stats::uniqueRatioAddrSpace += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
-  return markFeature<size_t, std::less<std::pair<size_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+  return markFeature<size_t>(st_set, marked);
 }
 
 std::vector<bool> LargestAddressSpace::operator()(
@@ -119,7 +119,7 @@ std::vector<bool> SmallestNumOfConstExpr::operator()(
 
   stats::uniqueRatioConcreteExprCount += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
-  return markFeature<unsigned int, std::less<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+  return markFeature<unsigned int>(st_set, marked);
 }
 
 std::vector<bool> HighestNumOfConstExpr::operator()(
@@ -183,7 +183,7 @@ std::vector<bool> SmallestNumOfSymExpr::operator()(
 
   stats::uniqueRatioSymbolicExprCount += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
-  return markFeature<unsigned int, std::less<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+  return markFeature<unsigned int>(st_set, marked);
 }
 
 

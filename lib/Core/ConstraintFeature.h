@@ -48,6 +48,30 @@ public:
                                        std::vector<bool> &marked);
 };
 
+class ShallowestCPLoop : public Feature {
+  public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
+                                       std::vector<bool> &marked);
+};
+
+class DeepestCPLoop : public Feature {
+  public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
+                                       std::vector<bool> &marked);
+};
+
+class ShallowestCSLoop : public Feature {
+  public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
+                                       std::vector<bool> &marked);
+};
+
+class DeepestCSLoop : public Feature {
+  public:
+  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
+                                       std::vector<bool> &marked);
+};
+
 } // End klee namespace
 
 #endif /* KLEE_CONSTRAINTFEATURE_H */

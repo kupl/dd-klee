@@ -5,6 +5,11 @@
 #include "StatsTracker.h"
 
 #include "klee/ExecutionState.h"
+#include "klee/Internal/Module/KModule.h"
+#include "klee/Internal/Module/KInstruction.h"
+
+#include "llvm/Analysis/LoopInfo.h"
+#include "llvm/IR/Dominators.h"
 
 #include <set>
 #include <vector>
@@ -47,7 +52,7 @@ std::vector<bool> HighestQueryCost::operator()(
     st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
   }
 
-  return markFeature<double>(st_set, marked);
+  return markFeature<double, std::greater<std::pair<double, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }
 
 std::vector<bool> ShallowestState::operator()(
@@ -121,5 +126,103 @@ std::vector<bool> LongestConstraints::operator()(
     st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
   }
 
-  return markFeature<size_t>(st_set, marked);
+  return markFeature<size_t, std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+}
+
+std::vector<bool> ShallowestCPLoop::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (CPLoopDepth, (ExecutionStae*, index of state)) sorted by CPLoopDepth
+  // with ascending order
+  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>> st_set;
+  
+  llvm::DominatorTree *DT;
+  llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> *KLoop = 0;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    BasicBlock *bb = st->pc->inst->getParent();
+    DT = new llvm::DominatorTree(*(st->stack.back().kf->function));
+    KLoop = new llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
+    KLoop->releaseMemory();
+    KLoop->analyze(*DT);
+    unsigned CPLoopDepth = KLoop->getLoopDepth(bb); 
+    st_set.insert(std::make_pair(CPLoopDepth, std::make_pair(st, i++)));
+  }
+
+  return markFeature<unsigned>(st_set, marked);
+}
+
+std::vector<bool> DeepestCPLoop::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (CPLoopDepth, (ExecutionStae*, index of state)) sorted by CPLoopDepth
+  // with descending order
+  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>> st_set;
+  
+  llvm::DominatorTree *DT;
+  llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> *KLoop = 0;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    BasicBlock *bb = st->pc->inst->getParent();
+    DT = new llvm::DominatorTree(*(st->stack.back().kf->function));
+    KLoop = new llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
+    KLoop->releaseMemory();
+    KLoop->analyze(*DT);
+    unsigned CPLoopDepth = KLoop->getLoopDepth(bb); 
+    st_set.insert(std::make_pair(CPLoopDepth, std::make_pair(st, i++)));
+  }
+
+  return markFeature<unsigned, std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+}
+
+std::vector<bool> ShallowestCSLoop::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (CSLoopDepth, (ExecutionStae*, index of state)) sorted by CSLoopDepth
+  // with ascending order
+  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>> st_set;
+  
+  llvm::DominatorTree *DT;
+  llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> *KLoop = 0;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    BasicBlock *bb = st->stack.back().caller->inst->getParent();
+    DT = new llvm::DominatorTree(*(st->stack.back().kf->function));
+    KLoop = new llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
+    KLoop->releaseMemory();
+    KLoop->analyze(*DT);
+    unsigned CSLoopDepth = KLoop->getLoopDepth(bb); 
+    st_set.insert(std::make_pair(CSLoopDepth, std::make_pair(st, i++)));
+  }
+
+  return markFeature<unsigned>(st_set, marked);
+}
+
+std::vector<bool> DeepestCSLoop::operator()(
+    const std::vector<ExecutionState*> &states,
+    std::vector<bool> &marked) {
+  // (CSLoopDepth, (ExecutionStae*, index of state)) sorted by CSLoopDepth
+  // with descending order
+  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>,
+           std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>> st_set;
+  
+  llvm::DominatorTree *DT;
+  llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> *KLoop = 0;
+
+  size_t i = 0;
+  for(const auto &st : states) {
+    BasicBlock *bb = st->stack.back().caller->inst->getParent();
+    DT = new llvm::DominatorTree(*(st->stack.back().kf->function));
+    KLoop = new llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
+    KLoop->releaseMemory();
+    KLoop->analyze(*DT);
+    unsigned CSLoopDepth = KLoop->getLoopDepth(bb); 
+    st_set.insert(std::make_pair(CSLoopDepth, std::make_pair(st, i++)));
+  }
+
+  return markFeature<unsigned, std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
 }

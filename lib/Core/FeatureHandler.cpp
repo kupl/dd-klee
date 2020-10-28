@@ -8,6 +8,7 @@
 
 #include "klee/ExecutionState.h"
 
+#include <algorithm>
 #include <map>
 #include <numeric>
 #include <fstream>
@@ -46,6 +47,10 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
   features.push_back(new DeepestState());
   features.push_back(new ShortestConstraints());
   features.push_back(new LongestConstraints());
+  features.push_back(new ShallowestCPLoop());
+  features.push_back(new DeepestCPLoop());
+  features.push_back(new ShallowestCSLoop());
+  features.push_back(new DeepestCSLoop());
 
   featureCount = features.size();
 
@@ -55,9 +60,10 @@ FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
 FeatureHandler::~FeatureHandler() {}
 
 void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states) {
-  std::vector<bool> marked(states.size(), false);
+  std::vector<bool> marked(states.size());
   fv_map.clear();
   for(const auto f : features) {
+    std::fill(marked.begin(), marked.end(), false);
     (*f)(states, marked);
     int statesCount = marked.size();
     assert(statesCount == (int)states.size() && "undesired behavior in feature extraction");
