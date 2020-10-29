@@ -18,14 +18,19 @@ class FeatureHandler {
     int featureCount;
     std::vector<Feature*> features;
     std::vector<double> weights;
-    std::map<ExecutionState*, std::vector<int>> fv_map;
-  
+    std::map<ExecutionState*, std::vector<double>> fv_map;
+
+    Executor &executor;
+    unsigned totalFeatureMaps;
   public:
-    FeatureHandler(const std::vector<ExecutionState*> &states,
-               const std::string &weightFile);
+    FeatureHandler(Executor &executor,
+                   const std::vector<ExecutionState*> &states,
+                   const std::string &weightFile);
     ~FeatureHandler();
     void extractFeatures(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);
+    
+    std::string getFeatureMapFilename(unsigned id);
 };
 
 } // End klee namespace

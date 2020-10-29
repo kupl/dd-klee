@@ -12,64 +12,34 @@ using namespace klee;
 
 namespace klee {
 
-class LowestQueryCost : public Feature {
+class FQueryCost : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class HighestQueryCost : public Feature {
+class FDepth : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class ShallowestState : public Feature {
+class FConstraints : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class DeepestState : public Feature {
+class FCallPathLoopDepth : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class ShortestConstraints : public Feature {
+class FCallerLoopDepth : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class LongestConstraints : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class ShallowestCPLoop : public Feature {
-  public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class DeepestCPLoop : public Feature {
-  public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class ShallowestCSLoop : public Feature {
-  public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class DeepestCSLoop : public Feature {
-  public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
 } // End klee namespace

@@ -12,24 +12,26 @@ namespace klee {
 
 class Feature {
 public:
-  static double criterion;
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked) = 0;
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states) = 0;
 };
 
-template <typename T, typename Pred = std::less<std::pair<T, std::pair<ExecutionState*, size_t>>>>
-inline std::vector<bool> markFeature(
-    const std::set<std::pair<T, std::pair<ExecutionState*, size_t>>, Pred> &st_set,
-    std::vector<bool> &marked) {
+template <typename T>
+inline std::vector<double>
+normalizeFeature(const std::set<std::pair<T, std::pair<ExecutionState*, size_t>>> &st_set) {
+  T max_value = st_set.rbegin()->first;
+  T min_value = st_set.begin()->first;
+  std::vector<double> fvalues(st_set.size(), 0.0);
 
-  auto boundary = st_set.cbegin();
-  std::advance(boundary, st_set.size() * Feature::criterion);
-
-  for(auto it = st_set.cbegin(); it != boundary; it++) {
-    marked[(it->second).second] = true;
+  // min-max normalization for feature values
+  if (max_value != min_value) {
+    for(auto it = st_set.cbegin(); it != st_set.cend(); it++) {
+      fvalues[(it->second).second] = 
+        (double) (it->first - min_value) / (max_value - min_value);
+    }
   }
 
-  return marked;
+  return fvalues;
 }
 
 } // End klee namespace

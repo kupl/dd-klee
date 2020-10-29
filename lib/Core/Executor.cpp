@@ -2966,7 +2966,6 @@ void Executor::run(ExecutionState &initialState) {
 
     updateStates(&state);
   }
-
   delete searcher;
   searcher = 0;
 

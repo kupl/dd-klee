@@ -11,52 +11,28 @@
 using namespace klee;
 
 namespace klee {
-class SmallestInstructionsStepped : public Feature {
+class FInstructionsStepped : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class LargestInstructionsStepped : public Feature {
+class FInstructionsSinceCovNew : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class SmallestInstructionsSinceCovNew : public Feature {
+class FCallPathInstructions : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class LargestInstructionsSinceCovNew : public Feature {
+class FMinDistToUncoveredInst : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class SmallestCallPathInstructions : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class LargestCallPathInstructions : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class ClosestToUncoveredInstruction : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class FarthestToUncoveredInstruction : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::vector<double>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
 } // End klee namespace

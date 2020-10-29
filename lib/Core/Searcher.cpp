@@ -476,7 +476,7 @@ void InterleavedSearcher::update(
 
 ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile,
                                              Executor &_executor)
-  : executor(_executor), f_handler(states, weightFile) {
+  : executor(_executor), f_handler(_executor, states, weightFile) {
 }
 
 ParameterizedSearcher::~ParameterizedSearcher() {}
@@ -527,14 +527,9 @@ void ParameterizedSearcher::update(
     f_handler.extractFeatures(states);
     top = f_handler.getTop(states);
 
-    ++stats::featureExtractions;
     stats::featureExtractionFork += addedStates.empty() ? 0 : 1;
     stats::featureExtractionTermination += removedStates.empty() ? 0 : 1;
     // stats::featureExtractionCall += current->stackPushed ? 1 : 0;
     // stats::featureExtractionReturn += current->stackPopped ? 1 : 0;
-
-    if(executor.statsTracker) {
-      executor.statsTracker->extractFeatures();
-    }
   }
 }

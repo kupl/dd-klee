@@ -104,10 +104,6 @@ namespace klee {
     // about to be stepped
     void stepInstruction(ExecutionState &es);
 
-    // process fstats for a single feature extracions conducted on
-    // ParameterizedSearcher
-    void extractFeatures();
-
     /// Return duration since execution start.
     time::Span elapsed();
 
