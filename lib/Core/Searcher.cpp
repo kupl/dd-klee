@@ -532,9 +532,5 @@ void ParameterizedSearcher::update(
     stats::featureExtractionTermination += removedStates.empty() ? 0 : 1;
     // stats::featureExtractionCall += current->stackPushed ? 1 : 0;
     // stats::featureExtractionReturn += current->stackPopped ? 1 : 0;
-
-    if(executor.statsTracker) {
-      executor.statsTracker->extractFeatures();
-    }
   }
 }

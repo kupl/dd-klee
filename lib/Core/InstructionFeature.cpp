@@ -20,16 +20,11 @@ std::vector<bool> SmallestInstructionsStepped::operator()(
   // with ascending order
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<uint64_t> val_set;
-
   size_t i = 0;
   for(const auto &st : states) {
     uint64_t steppedInstructions = st->steppedInstructions;
     st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
-    val_set.insert(steppedInstructions);
   }
-
-  stats::uniqueRatioInstsStepped += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<uint64_t>(st_set, marked);
 }
@@ -58,16 +53,11 @@ std::vector<bool> SmallestInstructionsSinceCovNew::operator()(
   // with ascending order
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<unsigned int> val_set;
-
   size_t i = 0;
   for(const auto &st : states) {
     unsigned int instsSinceCovNew = st->instsSinceCovNew;
     st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
-    val_set.insert(instsSinceCovNew);
   }
-
-  stats::uniqueRatioInstsSinceCovNew += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<unsigned int>(st_set, marked);
 }
@@ -97,16 +87,11 @@ std::vector<bool> SmallestCallPathInstructions::operator()(
   // CallPathInstruction: instructions in currently executing function
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<uint64_t> val_set;
-
   size_t i = 0;
   for(const auto &st : states) {
     uint64_t CPInsts = st->stack.back().callPathNode->statistics.getValue(stats::instructions);
     st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
-    val_set.insert(CPInsts);
   }
-
-  stats::uniqueRatioCPInsts += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<uint64_t>(st_set, marked);
 }
@@ -136,17 +121,12 @@ std::vector<bool> ClosestToUncoveredInstruction::operator()(
   // with ascending order
   std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<uint64_t> val_set;
-
   size_t i = 0;
   for(const auto &st : states) {
     StackFrame &sf = st->stack.back();
     uint64_t md2u = computeMinDistToUncovered(st->pc, sf.minDistToUncoveredOnReturn);
     st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
-    val_set.insert(md2u);
   }
-
-  stats::uniqueRatioMD2U += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<uint64_t>(st_set, marked);
 }

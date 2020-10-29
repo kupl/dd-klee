@@ -106,12 +106,6 @@ cl::opt<unsigned> IStatsWriteAfterInstructions(
         "Write istats after each n instructions, 0 to disable (default=0)"),
     cl::cat(StatsCat));
 
-cl::opt<unsigned> FStatsWriteAfterFeatureExtractions(
-    "fstats-write-after-feature-extractions", cl::init(0),
-    cl::desc(
-        "Write fstats after each n feature extractions, 0 to disable (default=0)"),
-    cl::cat(StatsCat));
-
 // XXX I really would like to have dynamic rate control for something like this.
 cl::opt<std::string> UncoveredUpdateInterval(
     "uncovered-update-interval", cl::init("30s"),
@@ -449,12 +443,6 @@ void StatsTracker::stepInstruction(ExecutionState &es) {
     writeIStats();
 }
 
-void StatsTracker::extractFeatures() {
-  if (fstatsFile && FStatsWriteAfterFeatureExtractions &&
-      stats::featureExtractions % FStatsWriteAfterFeatureExtractions.getValue() == 0)
-    writeFStatsLine();
-}
-
 ///
 
 /* Should be called _after_ the es->pushFrame() */
@@ -609,22 +597,11 @@ void StatsTracker::writeStatsHeader() {
 void StatsTracker::writeFStatsHeader() {
   std::ostringstream create, insert;
   create << "CREATE TABLE stats ";
-  create     << "(FeatureExtractions INTEGER,"
+  create     << "(FETotal INTEGER,"
              << "FEFork INTEGER,"
              << "FETermination INTEGER,"
              << "FECall INTEGER,"
-             << "FEReturn INTEGER,"
-             << "URInstsStepped INTEGER,"
-             << "URInstsSinceCovNew INTEGER,"
-             << "URCPInsts INTEGER,"
-             << "URMD2U INTEGER,"
-             << "URAddrSpace INTEGER,"
-             << "URSymbolics INTEGER,"
-             << "URConcreteExprCnt INTEGER,"
-             << "URSymExprCnt INTEGER,"
-             << "URQC INTEGER,"
-             << "URDepth INTEGER,"
-             << "URConstraints INTEGER"
+             << "FEReturn INTEGER"
              << ")";
   char *zErrMsg = nullptr;
   if(sqlite3_exec(fstatsFile, create.str().c_str(), nullptr, nullptr, &zErrMsg)) {
@@ -638,34 +615,12 @@ void StatsTracker::writeFStatsHeader() {
    * remove the constraints or consider using `IGNORE` mode.
    */
   insert << "INSERT OR FAIL INTO stats ( "
-             << "FeatureExtractions, "
-             << "FEFork ,"
-             << "FETermination ,"
-             << "FECall ,"
-             << "FEReturn, "
-             << "URInstsStepped, "
-             << "URInstsSinceCovNew, "
-             << "URCPInsts, "
-             << "URMD2U, "
-             << "URAddrSpace, "
-             << "URSymbolics, "
-             << "URConcreteExprCnt, "
-             << "URSymExprCnt, "
-             << "URQC, "
-             << "URDepth, "
-             << "URConstraints"
+             << "FETotal, "
+             << "FEFork,"
+             << "FETermination,"
+             << "FECall,"
+             << "FEReturn"
              << ") VALUES ( "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
-             << "?, "
              << "?, "
              << "?, "
              << "?, "
@@ -729,17 +684,6 @@ void StatsTracker::writeFStatsLine() {
   sqlite3_bind_int64(insertStmtOnFStats, 3, stats::featureExtractionTermination);
   sqlite3_bind_int64(insertStmtOnFStats, 4, stats::featureExtractionCall);
   sqlite3_bind_int64(insertStmtOnFStats, 5, stats::featureExtractionReturn);
-  sqlite3_bind_int64(insertStmtOnFStats, 6, stats::uniqueRatioInstsStepped);
-  sqlite3_bind_int64(insertStmtOnFStats, 7, stats::uniqueRatioInstsSinceCovNew);
-  sqlite3_bind_int64(insertStmtOnFStats, 8, stats::uniqueRatioCPInsts);
-  sqlite3_bind_int64(insertStmtOnFStats, 9, stats::uniqueRatioMD2U);
-  sqlite3_bind_int64(insertStmtOnFStats, 10, stats::uniqueRatioAddrSpace);
-  sqlite3_bind_int64(insertStmtOnFStats, 11, stats::uniqueRatioSymbolics);
-  sqlite3_bind_int64(insertStmtOnFStats, 12, stats::uniqueRatioConcreteExprCount);
-  sqlite3_bind_int64(insertStmtOnFStats, 13, stats::uniqueRatioSymbolicExprCount);
-  sqlite3_bind_int64(insertStmtOnFStats, 14, stats::uniqueRatioQC);
-  sqlite3_bind_int64(insertStmtOnFStats, 15, stats::uniqueRatioDepth);
-  sqlite3_bind_int64(insertStmtOnFStats, 16, stats::uniqueRatioConstraints);
 
   int errCode = sqlite3_step(insertStmtOnFStats);
   if(errCode != SQLITE_DONE) klee_error("Error writing stats data: %s", sqlite3_errmsg(fstatsFile));

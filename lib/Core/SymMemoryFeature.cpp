@@ -19,16 +19,11 @@ std::vector<bool> SmallestAddressSpace::operator()(
   // with ascending order
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<size_t> val_set;
-
   size_t i = 0;
   for(const auto &st: states) {
     size_t addressSpaceSize = st->addressSpace.objects.size();
     st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
-    val_set.insert(addressSpaceSize);
   }
-
-  stats::uniqueRatioAddrSpace += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<size_t>(st_set, marked);
 }
@@ -57,16 +52,11 @@ std::vector<bool> SmallestSymbolics::operator()(
   // with ascending order 
   std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<size_t> val_set;
-
   size_t i = 0;
   for(const auto &st: states) {
     size_t symSize = st->symbolics.size();
     st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
-    val_set.insert(symSize);
   }
-
-  stats::uniqueRatioSymbolics += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<size_t>(st_set, marked);
 }
@@ -96,8 +86,6 @@ std::vector<bool> SmallestNumOfConstExpr::operator()(
   // constCnt: the number of local variables mapped with concrete values;
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<unsigned int> val_set;
-
   size_t i = 0;
   for(const auto &st : states) {
     unsigned int constCnt = 0;
@@ -114,10 +102,7 @@ std::vector<bool> SmallestNumOfConstExpr::operator()(
       }
     }
     st_set.insert(std::make_pair(constCnt, std::make_pair(st, i++)));
-    val_set.insert(constCnt);
   }
-
-  stats::uniqueRatioConcreteExprCount += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<unsigned int>(st_set, marked);
 }
@@ -160,8 +145,6 @@ std::vector<bool> SmallestNumOfSymExpr::operator()(
   // symCnt: the number of local variables mapped with symbolic expressions
   std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
 
-  std::set<unsigned int> val_set;
-
   size_t i = 0;
   for(const auto &st : states) {
     unsigned int symCnt = 0;
@@ -178,10 +161,7 @@ std::vector<bool> SmallestNumOfSymExpr::operator()(
       }
     }
     st_set.insert(std::make_pair(symCnt, std::make_pair(st, i++)));
-    val_set.insert(symCnt);
   }
-
-  stats::uniqueRatioSymbolicExprCount += (uint64_t) ((double) val_set.size() / states.size() * 100.0);
 
   return markFeature<unsigned int>(st_set, marked);
 }
