@@ -83,9 +83,9 @@ void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states)
       fv_map[states[i]].push_back(fvalues[i]);
     }
   }
-  ++stats::featureExtractionTotal;
+  ++stats::featureExtractions;
   if (WriteFeatureMapAfterFeatureExtractions &&
-      stats::featureExtractionTotal % WriteFeatureMapAfterFeatureExtractions.getValue() == 0) {
+      stats::featureExtractions % WriteFeatureMapAfterFeatureExtractions.getValue() == 0) {
     unsigned id = ++totalFeatureMaps;
     std::string path = 
       executor.interpreterHandler->getOutputFilename(getFeatureMapFilename(id));

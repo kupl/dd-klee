@@ -6,14 +6,7 @@
 
 namespace klee {
 namespace stats {
-
-  /// The number of feature extractions for each situation
-  extern Statistic featureExtractionTotal;
-  extern Statistic featureExtractionFork;
-  extern Statistic featureExtractionTermination;
-  extern Statistic featureExtractionCall;
-  extern Statistic featureExtractionReturn;
-  
+  extern Statistic featureExtractions;
 }
 }
 
