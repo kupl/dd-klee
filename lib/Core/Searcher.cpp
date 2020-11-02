@@ -476,13 +476,17 @@ void InterleavedSearcher::update(
 
 ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile,
                                              Executor &_executor)
-  : executor(_executor), f_handler(_executor, states, weightFile) {
+  : f_handler(_executor, states, weightFile),
+    updateFeatureMap(false) {
 }
 
 ParameterizedSearcher::~ParameterizedSearcher() {}
  
 ExecutionState &ParameterizedSearcher::selectState() {
-  assert(top && "score has not been caclculated!");
+  if (updateFeatureMap) {
+    f_handler.extractFeatures(states);
+    top = f_handler.getTop(states);
+  }
   return *top;
 }
 
@@ -517,19 +521,8 @@ void ParameterizedSearcher::update(
 	
   if(states.size() == 1) {
     top = states[0];
-    return;
-  }
-
-  if(states.empty())
-    return;
-
-  if(statesChanged) {
-    f_handler.extractFeatures(states);
-    top = f_handler.getTop(states);
-
-    stats::featureExtractionFork += addedStates.empty() ? 0 : 1;
-    stats::featureExtractionTermination += removedStates.empty() ? 0 : 1;
-    // stats::featureExtractionCall += current->stackPushed ? 1 : 0;
-    // stats::featureExtractionReturn += current->stackPopped ? 1 : 0;
+    updateFeatureMap = false;
+  } else {
+    updateFeatureMap = statesChanged;
   }
 }

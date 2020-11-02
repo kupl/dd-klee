@@ -329,11 +329,11 @@ namespace klee {
   };
 
   class ParameterizedSearcher : public Searcher {
-    Executor &executor;
     std::vector<ExecutionState*> states;
     ExecutionState* top;
     FeatureHandler f_handler;
-
+  
+    bool updateFeatureMap;
   public:
     ParameterizedSearcher(const std::string &weightFile, Executor &_executor);
     ~ParameterizedSearcher();
