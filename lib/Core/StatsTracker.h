@@ -48,13 +48,6 @@ namespace klee {
     std::uint32_t statsWriteCount = 0;
     time::Point startWallTime;
 
-    ::sqlite3 *fstatsFile = nullptr;
-    ::sqlite3_stmt *transactionBeginStmtOnFStats = nullptr;
-    ::sqlite3_stmt *transactionEndStmtOnFStats = nullptr;
-    ::sqlite3_stmt *insertStmtOnFStats = nullptr;
-    std::uint32_t fstatsCommitEvery;
-    std::uint32_t fstatsWriteCount = 0;
-
     unsigned numBranches;
     unsigned fullBranches, partialBranches;
 
@@ -65,14 +58,11 @@ namespace klee {
   public:
     static bool useStatistics();
     static bool useIStats();
-    static bool useFStats();
 
   private:
     void updateStateStatistics(uint64_t addend);
     void writeStatsHeader();
     void writeStatsLine();
-    void writeFStatsHeader();
-    void writeFStatsLine();
     void writeIStats();
 
   public:
@@ -103,10 +93,6 @@ namespace klee {
     // process stats for a single instruction step, es is the state
     // about to be stepped
     void stepInstruction(ExecutionState &es);
-
-    // process fstats for a single feature extracions conducted on
-    // ParameterizedSearcher
-    void extractFeatures();
 
     /// Return duration since execution start.
     time::Span elapsed();

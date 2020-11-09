@@ -2,6 +2,7 @@
 #include "ConstraintFeature.h"
 #include "Executor.h"
 #include "FeatureHandler.h"
+#include "FeatureStats.h"
 #include "InstructionFeature.h"
 #include "StatsTracker.h"
 #include "SymMemoryFeature.h"
@@ -71,6 +72,7 @@ void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states)
       fv_map[states[i]].push_back(marked[i]);
     }
   }
+  ++stats::featureExtractions;
 }
 
 ExecutionState* FeatureHandler::getTop(const std::vector<ExecutionState*> &states) {

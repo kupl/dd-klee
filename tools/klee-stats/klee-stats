@@ -45,11 +45,7 @@ Legend = [
     ('TResolve(%)', 'time spent in object resolution wrt wall time', "ResolveTime"),
     ('QCexCMisses', 'Counterexample cache misses', "QueryCexCacheMisses"),
     ('QCexCHits', 'Counterexample cache hits', "QueryCexCacheHits"),
-    ('FETotal', 'total number of feature extractions', 'FeatureExtractionTotal'),
-    ('FEFork', 'number of feature extractions by fork', 'FeatureExtractionFork'),
-    ('FETermination', 'number of feature extractions by termination', 'FeatureExtractionTermination'),
-    ('FECall', 'number of feature extractions by call', 'FeatureExtractionCall'),
-    ('FEReturn', 'number of feature extractions by return', 'FeatureExtractionReturn'),
+    ('FETotal', 'total number of feature extractions', 'FeatureExtractions'),
 ]
 
 def getInfoFile(path):
@@ -59,10 +55,6 @@ def getInfoFile(path):
 def getLogFile(path):
     """Return the path to run.stats."""
     return os.path.join(path, 'run.stats')
-
-def getFStatsFile(path):
-    """Return the path to feature.stats."""
-    return os.path.join(path, 'feature.stats')
 
 class LazyEvalList:
     """Store all the lines in run.stats and eval() when needed."""
@@ -136,8 +128,8 @@ def select_columns(record, pr):
         s_column = ['Path', 'Instructions', 'WallTime', 'ICov', 'BCov', 'ICount',
                   'RelSolverTime', 'States', 'maxStates', 'MallocUsage', 'maxMem']
     elif pr == 'fstats':
-        s_column = ['Path', 'FETotal', 'FEFork',
-                    'FETermination', 'FECall', 'FEReturn']
+        s_column = ['Path', 'FETotal', 'Instructions', 'WallTime', 'ICov',
+                  'BCov', 'ICount', 'RelSolverTime']
     else:
         s_column = ['Path', 'Instructions', 'WallTime', 'ICov',
                   'BCov', 'ICount', 'RelSolverTime']
@@ -494,10 +486,7 @@ def main():
       return grafana(dirs, args.grafana_host, args.grafana_port)
 
     # Filter non-existing files, useful for star operations
-    if pr == 'fstats':
-        valid_files = [getFStatsFile(f) for f in dirs if os.path.isfile(getFStatsFile(f))]
-    else:
-        valid_files = [getLogFile(f) for f in dirs if os.path.isfile(getLogFile(f))]
+    valid_files = [getLogFile(f) for f in dirs if os.path.isfile(getLogFile(f))]
 
     # read contents from every run.stats file into LazyEvalList
     data = [LazyEvalList(d) for d in valid_files]
