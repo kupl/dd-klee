@@ -22,7 +22,7 @@ class FeatureHandler {
   
   public:
     FeatureHandler(const std::vector<ExecutionState*> &states,
-               const std::string &weightFile);
+                   const std::string &weightFile);
     ~FeatureHandler();
     void extractFeatures(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);

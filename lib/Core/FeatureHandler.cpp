@@ -15,7 +15,7 @@
 #include <vector>
 
 FeatureHandler::FeatureHandler(const std::vector<ExecutionState*> &states,
-                       const std::string &weightFile) {
+                               const std::string &weightFile) {
   double weight;
   std::ifstream win(weightFile.c_str());
 
