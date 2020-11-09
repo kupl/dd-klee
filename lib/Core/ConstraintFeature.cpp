@@ -175,12 +175,18 @@ std::vector<bool> ShallowestCSLoop::operator()(
 
   size_t i = 0;
   for(const auto &st : states) {
-    BasicBlock *bb = st->stack.back().caller->inst->getParent();
-    DT = llvm::DominatorTree(*(st->stack.back().kf->function));
-    KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
-    KLoop.releaseMemory();
-    KLoop.analyze(DT);
-    unsigned CSLoopDepth = KLoop.getLoopDepth(bb); 
+    KInstIterator caller = st->stack.back().caller;
+    unsigned CSLoopDepth;
+    if (caller) {
+      BasicBlock *bb = caller->inst->getParent();
+      DT = llvm::DominatorTree(*(st->stack.back().kf->function));
+      KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
+      KLoop.releaseMemory();
+      KLoop.analyze(DT);
+      CSLoopDepth = KLoop.getLoopDepth(bb);
+    } else { // main function
+      CSLoopDepth = 0;
+    }
     st_set.insert(std::make_pair(CSLoopDepth, std::make_pair(st, i++)));
   }
 
@@ -200,12 +206,18 @@ std::vector<bool> DeepestCSLoop::operator()(
 
   size_t i = 0;
   for(const auto &st : states) {
-    BasicBlock *bb = st->stack.back().caller->inst->getParent();
-    DT = llvm::DominatorTree(*(st->stack.back().kf->function));
-    KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
-    KLoop.releaseMemory();
-    KLoop.analyze(DT);
-    unsigned CSLoopDepth = KLoop.getLoopDepth(bb); 
+    KInstIterator caller = st->stack.back().caller;
+    unsigned CSLoopDepth;
+    if (caller) {
+      BasicBlock *bb = caller->inst->getParent();
+      DT = llvm::DominatorTree(*(st->stack.back().kf->function));
+      KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
+      KLoop.releaseMemory();
+      KLoop.analyze(DT);
+      CSLoopDepth = KLoop.getLoopDepth(bb);
+    } else { // main function
+      CSLoopDepth = 0;
+    }
     st_set.insert(std::make_pair(CSLoopDepth, std::make_pair(st, i++)));
   }
 
