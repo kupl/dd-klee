@@ -12,52 +12,28 @@ using namespace klee;
 
 namespace klee {
 
-class SmallestAddressSpace : public Feature {
+class FAddressSpace : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::set<std::pair<double, ExecutionState*>>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class LargestAddressSpace : public Feature {
+class FSymbolics : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::set<std::pair<double, ExecutionState*>>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class SmallestSymbolics : public Feature {
+class FNumOfConstExpr : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::set<std::pair<double, ExecutionState*>>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
-class LargestSymbolics : public Feature {
+class FNumOfSymExpr : public Feature {
 public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class SmallestNumOfConstExpr : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class HighestNumOfConstExpr : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class SmallestNumOfSymExpr : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
-};
-
-class HighestNumOfSymExpr : public Feature {
-public:
-  virtual std::vector<bool> operator()(const std::vector<ExecutionState*> &states,
-                                       std::vector<bool> &marked);
+  virtual std::set<std::pair<double, ExecutionState*>>
+  operator()(const std::vector<ExecutionState*> &states);
 };
 
 } // End klee namespace

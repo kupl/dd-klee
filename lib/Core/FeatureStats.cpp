@@ -3,4 +3,4 @@
 
 using namespace klee;
 
-Statistic stats::featureExtractions("FeatureExtractions", "FE");
+Statistic stats::featureExtractions("FeatureExtractions", "FETotal");

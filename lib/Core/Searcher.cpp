@@ -474,8 +474,9 @@ void InterleavedSearcher::update(
 
 ///
 
-ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile)
-  : f_handler(states, weightFile),
+ParameterizedSearcher::ParameterizedSearcher(const std::string &weightFile,
+                                             Executor &_executor)
+  : f_handler(_executor, states, weightFile),
     updateFeatureMap(false) {
 }
 
@@ -485,6 +486,8 @@ ExecutionState &ParameterizedSearcher::selectState() {
   if (updateFeatureMap) {
     f_handler.extractFeatures(states);
     top = f_handler.getTop(states);
+  } else {
+    top = states[theRNG.getInt32()%states.size()];
   }
   return *top;
 }
@@ -515,11 +518,6 @@ void ParameterizedSearcher::update(
 
     assert(ok && "invalid state removed");
   }
-
-  if(states.size() == 1) {
-    top = states[0];
-    updateFeatureMap = false;
-  } else { 
-    updateFeatureMap = true;
-  }
+	
+  updateFeatureMap = (states.size() * Feature::criterion) >= 1;
 }

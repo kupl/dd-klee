@@ -17,209 +17,84 @@
 using namespace klee;
 using namespace llvm;
 
-std::vector<bool> LowestQueryCost::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (queryCost, (ExecutionState*, index of state)) sorted by queryCost
-  // with ascending order
-  std::set<std::pair<double, std::pair<ExecutionState*, size_t>>> st_set;
+std::set<std::pair<double, ExecutionState*>>
+FQueryCost::operator()(const std::vector<ExecutionState*> &states) {
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
     double qc = st->queryCost.toSeconds();
-    st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
+    st_set.insert(std::make_pair(qc, st));
   }
 
-  return markFeature<double>(st_set, marked);
+  return st_set;
 }
 
-std::vector<bool> HighestQueryCost::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (queryCost, (ExecutionState*, index of state)) sorted by queryCost
-  // with descending order
-  std::set<std::pair<double, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<double, std::pair<ExecutionState*, size_t>>>> st_set;
+std::set<std::pair<double, ExecutionState*>>
+FDepth::operator()(const std::vector<ExecutionState*> &states) {
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
-    double qc = st->queryCost.toSeconds();
-    st_set.insert(std::make_pair(qc, std::make_pair(st, i++)));
+    double depth = (double)st->depth;
+    st_set.insert(std::make_pair(depth, st));
   }
 
-  return markFeature<double, std::greater<std::pair<double, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+  return st_set;
 }
 
-std::vector<bool> ShallowestState::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (depth, (ExecutionState*, index of state)) sorted by depth with ascending order
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
+std::set<std::pair<double, ExecutionState*>>
+FConstraints::operator()(const std::vector<ExecutionState*> &states) {
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
-    unsigned int depth = st->depth;
-    st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
+    double constraintsSize = (double)st->constraints.size();
+    st_set.insert(std::make_pair(constraintsSize, st));
   }
 
-  return markFeature<unsigned int>(st_set, marked);
+  return st_set;
 }
 
-std::vector<bool> DeepestState::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (depth, (ExecutionState*, index of state)) sorted by depth with descending order
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>> st_set;
-
-  size_t i = 0;
-  for(const auto &st : states) {
-    unsigned int depth = st->depth;
-    st_set.insert(std::make_pair(depth, std::make_pair(st, i++)));
-  }
-
-  return markFeature<unsigned int, std::greater<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
-}
-
-std::vector<bool> ShortestConstraints::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (constraintsSize, (ExecutionState*, index of state)) sorted by constraintsSize
-  // with ascending order
-  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
-
-  size_t i = 0;
-  for(const auto &st : states) {
-    size_t constraintsSize = st->constraints.size();
-    st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
-  }
-
-  return markFeature<size_t>(st_set, marked);
-}
-
-std::vector<bool> LongestConstraints::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (constraintsSize, (ExecutionState*, index of state)) sorted by constraintsSize
-  // with descending order
-  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>> st_set;
-
-  size_t i = 0;
-  for(const auto &st : states) {
-    size_t constraintsSize = st->constraints.size();
-    st_set.insert(std::make_pair(constraintsSize, std::make_pair(st, i++)));
-  }
-
-  return markFeature<size_t, std::greater<std::pair<size_t, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
-}
-
-std::vector<bool> ShallowestCPLoop::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (CPLoopDepth, (ExecutionStae*, index of state)) sorted by CPLoopDepth
-  // with ascending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>> st_set;
+std::set<std::pair<double, ExecutionState*>>
+FCallPathLoopDepth::operator()(const std::vector<ExecutionState*> &states) {
+  std::set<std::pair<double, ExecutionState*>> st_set;
   
   llvm::DominatorTree DT;
   llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> KLoop;
 
-  size_t i = 0;
   for(const auto &st : states) {
     BasicBlock *bb = st->pc->inst->getParent();
     DT = llvm::DominatorTree(*(st->stack.back().kf->function));
     KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
     KLoop.releaseMemory();
     KLoop.analyze(DT);
-    unsigned CPLoopDepth = KLoop.getLoopDepth(bb); 
-    st_set.insert(std::make_pair(CPLoopDepth, std::make_pair(st, i++)));
+    double CPLoopDepth = (double)KLoop.getLoopDepth(bb); 
+    st_set.insert(std::make_pair(CPLoopDepth, st));
   }
 
-  return markFeature<unsigned>(st_set, marked);
+  return st_set;
 }
 
-std::vector<bool> DeepestCPLoop::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (CPLoopDepth, (ExecutionStae*, index of state)) sorted by CPLoopDepth
-  // with descending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>> st_set;
+std::set<std::pair<double, ExecutionState*>>
+FCallerLoopDepth::operator()(const std::vector<ExecutionState*> &states) {
+  std::set<std::pair<double, ExecutionState*>> st_set;
   
   llvm::DominatorTree DT;
   llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> KLoop;
 
-  size_t i = 0;
-  for(const auto &st : states) {
-    BasicBlock *bb = st->pc->inst->getParent();
-    DT = llvm::DominatorTree(*(st->stack.back().kf->function));
-    KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
-    KLoop.releaseMemory();
-    KLoop.analyze(DT);
-    unsigned CPLoopDepth = KLoop.getLoopDepth(bb); 
-    st_set.insert(std::make_pair(CPLoopDepth, std::make_pair(st, i++)));
-  }
-
-  return markFeature<unsigned, std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
-}
-
-std::vector<bool> ShallowestCSLoop::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (CSLoopDepth, (ExecutionStae*, index of state)) sorted by CSLoopDepth
-  // with ascending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>> st_set;
-  
-  llvm::DominatorTree DT;
-  llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> KLoop;
-
-  size_t i = 0;
   for(const auto &st : states) {
     KInstIterator caller = st->stack.back().caller;
-    unsigned CSLoopDepth;
+    double CSLoopDepth;
     if (caller) {
-      BasicBlock *bb = caller->inst->getParent();
-      DT = llvm::DominatorTree(*(st->stack.back().kf->function));
+      BasicBlock *bb = st->stack.back().caller->inst->getParent();
+      DT = llvm::DominatorTree(*(caller->inst->getFunction()));
       KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
       KLoop.releaseMemory();
       KLoop.analyze(DT);
-      CSLoopDepth = KLoop.getLoopDepth(bb);
+      CSLoopDepth = (double)KLoop.getLoopDepth(bb);
     } else { // main function
-      CSLoopDepth = 0;
+      CSLoopDepth = 0.0;
     }
-    st_set.insert(std::make_pair(CSLoopDepth, std::make_pair(st, i++)));
+    st_set.insert(std::make_pair(CSLoopDepth, st));
   }
 
-  return markFeature<unsigned>(st_set, marked);
-}
-
-std::vector<bool> DeepestCSLoop::operator()(
-    const std::vector<ExecutionState*> &states,
-    std::vector<bool> &marked) {
-  // (CSLoopDepth, (ExecutionStae*, index of state)) sorted by CSLoopDepth
-  // with descending order
-  std::set<std::pair<unsigned, std::pair<ExecutionState*, size_t>>,
-           std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>> st_set;
-  
-  llvm::DominatorTree DT;
-  llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop> KLoop;
-
-  size_t i = 0;
-  for(const auto &st : states) {
-    KInstIterator caller = st->stack.back().caller;
-    unsigned CSLoopDepth;
-    if (caller) {
-      BasicBlock *bb = caller->inst->getParent();
-      DT = llvm::DominatorTree(*(st->stack.back().kf->function));
-      KLoop = llvm::LoopInfoBase<llvm::BasicBlock, llvm::Loop>();
-      KLoop.releaseMemory();
-      KLoop.analyze(DT);
-      CSLoopDepth = KLoop.getLoopDepth(bb);
-    } else { // main function
-      CSLoopDepth = 0;
-    }
-    st_set.insert(std::make_pair(CSLoopDepth, std::make_pair(st, i++)));
-  }
-
-  return markFeature<unsigned, std::greater<std::pair<unsigned, std::pair<ExecutionState*, size_t>>>>(st_set, marked);
+  return st_set;
 }
