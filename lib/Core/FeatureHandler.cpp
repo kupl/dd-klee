@@ -50,6 +50,7 @@ FeatureHandler::FeatureHandler(Executor &_executor,
   while (win >> weight)
     weights.push_back(weight);
 
+  // mark top, bottom states for each element of features
   features.push_back(new FInstructionsStepped());
   features.push_back(new FInstructionsSinceCovNew());
   features.push_back(new FCallPathInstructions());
