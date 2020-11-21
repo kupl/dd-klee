@@ -12,38 +12,35 @@
 using namespace klee;
 using namespace llvm;
 
-std::vector<double>
+std::set<std::pair<double, ExecutionState*>>
 FAddressSpace::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st: states) {
-    size_t addressSpaceSize = st->addressSpace.objects.size();
-    st_set.insert(std::make_pair(addressSpaceSize, std::make_pair(st, i++)));
+    double addressSpaceSize = (double)st->addressSpace.objects.size();
+    st_set.insert(std::make_pair(addressSpaceSize, st));
   }
 
-  return normalizeFeature<size_t>(st_set);
+  return st_set;
 }
 
 
-std::vector<double>
+std::set<std::pair<double, ExecutionState*>>
 FSymbolics::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<size_t, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st: states) {
-    size_t symSize = st->symbolics.size();
-    st_set.insert(std::make_pair(symSize, std::make_pair(st, i++)));
+    double symSize = (double)st->symbolics.size();
+    st_set.insert(std::make_pair(symSize, st));
   }
 
-  return normalizeFeature<size_t>(st_set);
+  return st_set;
 }
 
-std::vector<double>
+std::set<std::pair<double, ExecutionState*>>
 FNumOfConstExpr::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
     unsigned int constCnt = 0;
     for(auto &sf : st->stack) {
@@ -58,17 +55,16 @@ FNumOfConstExpr::operator()(const std::vector<ExecutionState*> &states) {
           constCnt++;
       }
     }
-    st_set.insert(std::make_pair(constCnt, std::make_pair(st, i++)));
+    st_set.insert(std::make_pair((double)constCnt, st));
   }
 
-  return normalizeFeature<unsigned int>(st_set);
+  return st_set;
 }
 
-std::vector<double>
+std::set<std::pair<double, ExecutionState*>>
 FNumOfSymExpr::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
     unsigned int symCnt = 0;
     for(auto &sf : st->stack) {
@@ -83,8 +79,8 @@ FNumOfSymExpr::operator()(const std::vector<ExecutionState*> &states) {
           symCnt++;
       }
     }
-    st_set.insert(std::make_pair(symCnt, std::make_pair(st, i++)));
+    st_set.insert(std::make_pair((double)symCnt, st));
   }
 
-  return normalizeFeature<unsigned int>(st_set);
+  return st_set;
 }

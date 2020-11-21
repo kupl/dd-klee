@@ -14,25 +14,25 @@ namespace klee {
 
 class FAddressSpace : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FSymbolics : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FNumOfConstExpr : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FNumOfSymExpr : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 

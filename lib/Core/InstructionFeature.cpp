@@ -13,55 +13,51 @@
 using namespace klee;
 using namespace llvm;
 
-std::vector<double>
+std::set<std::pair<double, ExecutionState*>>
 FInstructionsStepped::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
-    uint64_t steppedInstructions = st->steppedInstructions;
-    st_set.insert(std::make_pair(steppedInstructions, std::make_pair(st, i++)));
+    double steppedInstructions = (double)st->steppedInstructions;
+    st_set.insert(std::make_pair(steppedInstructions, st));
   }
 
-  return normalizeFeature<uint64_t>(st_set);
+  return st_set;
 }
 
-std::vector<double>
+std::set<std::pair<double, ExecutionState*>>
 FInstructionsSinceCovNew::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<unsigned int, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
-    unsigned int instsSinceCovNew = st->instsSinceCovNew;
-    st_set.insert(std::make_pair(instsSinceCovNew, std::make_pair(st, i++)));
+    double instsSinceCovNew = (double)st->instsSinceCovNew;
+    st_set.insert(std::make_pair(instsSinceCovNew, st));
   }
 
-  return normalizeFeature<unsigned int>(st_set);
+  return st_set;
 }
 
-std::vector<double> 
+std::set<std::pair<double, ExecutionState*>>
 FCallPathInstructions::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
-    uint64_t CPInsts = st->stack.back().callPathNode->statistics.getValue(stats::instructions);
-    st_set.insert(std::make_pair(CPInsts, std::make_pair(st, i++)));
+    double CPInsts = (double)st->stack.back().callPathNode->statistics.getValue(stats::instructions);
+    st_set.insert(std::make_pair(CPInsts, st));
   }
 
-  return normalizeFeature<uint64_t>(st_set);
+  return st_set;
 }
 
-std::vector<double>
+std::set<std::pair<double, ExecutionState*>>
 FMinDistToUncoveredInst::operator()(const std::vector<ExecutionState*> &states) {
-  std::set<std::pair<uint64_t, std::pair<ExecutionState*, size_t>>> st_set;
+  std::set<std::pair<double, ExecutionState*>> st_set;
 
-  size_t i = 0;
   for(const auto &st : states) {
     StackFrame &sf = st->stack.back();
-    uint64_t md2u = computeMinDistToUncovered(st->pc, sf.minDistToUncoveredOnReturn);
-    st_set.insert(std::make_pair(md2u, std::make_pair(st, i++)));
+    double md2u = (double)computeMinDistToUncovered(st->pc, sf.minDistToUncoveredOnReturn);
+    st_set.insert(std::make_pair(md2u, st));
   }
 
-  return normalizeFeature<uint64_t>(st_set);
+  return st_set;
 }

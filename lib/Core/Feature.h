@@ -12,27 +12,11 @@ namespace klee {
 
 class Feature {
 public:
-  virtual std::vector<double>
+  static double criterion;
+
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states) = 0;
 };
-
-template <typename T>
-inline std::vector<double>
-normalizeFeature(const std::set<std::pair<T, std::pair<ExecutionState*, size_t>>> &st_set) {
-  T max_value = st_set.rbegin()->first;
-  T min_value = st_set.begin()->first;
-  std::vector<double> fvalues(st_set.size(), 0.0);
-
-  // min-max normalization for feature values
-  if (max_value != min_value) {
-    for(auto it = st_set.cbegin(); it != st_set.cend(); it++) {
-      fvalues[(it->second).second] = 
-        (double) (it->first - min_value) / (max_value - min_value);
-    }
-  }
-
-  return fvalues;
-}
 
 } // End klee namespace
 

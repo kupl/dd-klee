@@ -13,25 +13,25 @@ using namespace klee;
 namespace klee {
 class FInstructionsStepped : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FInstructionsSinceCovNew : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FCallPathInstructions : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FMinDistToUncoveredInst : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 

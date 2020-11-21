@@ -68,22 +68,40 @@ FeatureHandler::FeatureHandler(Executor &_executor,
 
   featureCount = features.size();
 
-  assert(featureCount == (int)weights.size() && "weight size error");
+  assert(featureCount * 2 == (int)weights.size() && "weight size error");
 }
 
 FeatureHandler::~FeatureHandler() {}
 
 void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states) {
   fv_map.clear();
+  raw_fv_map.clear();
+  
+  int bot = (int) states.size() * Feature::criterion;
+  int top = states.size() - bot;
   for(const auto f : features) {
-    std::vector<double> fvalues = (*f)(states);
-    int statesCount = fvalues.size();
-    assert(statesCount == (int)states.size() && "undesired behavior in feature extraction");
-    for(int i = 0; i < statesCount; i++) {
-      fv_map[states[i]].push_back(fvalues[i]);
+    std::set<std::pair<double, ExecutionState*>> fvalues = (*f)(states);
+
+    int i = 0;
+    for(const auto &fvalues_el: fvalues) {
+      if(i < bot) {
+        fv_map[fvalues_el.second].push_back(1);
+        fv_map[fvalues_el.second].push_back(0);
+      } else if (i < top) {
+        fv_map[fvalues_el.second].push_back(0);
+        fv_map[fvalues_el.second].push_back(0);
+      } else {
+        fv_map[fvalues_el.second].push_back(0);
+        fv_map[fvalues_el.second].push_back(1);
+      }
+      i++;
     }
+
+    if (WriteFeatureMapAfterFeatureExtractions &&
+        stats::featureExtractions % WriteFeatureMapAfterFeatureExtractions.getValue() == 0)
+      normalizeFeature(fvalues);  
   }
-  ++stats::featureExtractions;
+
   if (WriteFeatureMapAfterFeatureExtractions &&
       stats::featureExtractions % WriteFeatureMapAfterFeatureExtractions.getValue() == 0) {
     unsigned id = ++totalFeatureMaps;
@@ -92,8 +110,7 @@ void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states)
     std::string error;
     auto f = klee_open_output_file(path, error);
 
-    for (const auto &fvector : fv_map) {
-      
+    for (const auto &fvector : raw_fv_map) {
       int i;
       const auto &v = fvector.second;
       i = 0;
@@ -105,6 +122,7 @@ void FeatureHandler::extractFeatures(const std::vector<ExecutionState*> &states)
       *f << "\n";
     }
   }
+  ++stats::featureExtractions;
 }
 
 ExecutionState* FeatureHandler::getTop(const std::vector<ExecutionState*> &states) {
@@ -120,6 +138,20 @@ ExecutionState* FeatureHandler::getTop(const std::vector<ExecutionState*> &state
   }
 
   return topState;
+}
+
+void FeatureHandler::normalizeFeature(const std::set<std::pair<double, ExecutionState*>> &fvalues) {
+  double max_value = fvalues.rbegin()->first;
+  double min_value = fvalues.begin()->first;
+
+  // min-max normalization for feature values
+  for(const auto &fvalues_el : fvalues) {
+    if(max_value != min_value) {
+      raw_fv_map[fvalues_el.second].push_back((double) (fvalues_el.first - min_value) / (max_value - min_value));
+    } else {
+      raw_fv_map[fvalues_el.second].push_back(0.0);
+    }
+  }
 }
   
   

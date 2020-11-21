@@ -14,31 +14,31 @@ namespace klee {
 
 class FQueryCost : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FDepth : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FConstraints : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FCallPathLoopDepth : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 
 class FCallerLoopDepth : public Feature {
 public:
-  virtual std::vector<double>
+  virtual std::set<std::pair<double, ExecutionState*>>
   operator()(const std::vector<ExecutionState*> &states);
 };
 

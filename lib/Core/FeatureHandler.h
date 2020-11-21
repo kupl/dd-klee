@@ -18,7 +18,8 @@ class FeatureHandler {
     int featureCount;
     std::vector<Feature*> features;
     std::vector<double> weights;
-    std::map<ExecutionState*, std::vector<double>> fv_map;
+    std::map<ExecutionState*, std::vector<int>> fv_map;
+    std::map<ExecutionState*, std::vector<double>> raw_fv_map;
 
     Executor &executor;
     unsigned totalFeatureMaps;
@@ -30,6 +31,7 @@ class FeatureHandler {
     void extractFeatures(const std::vector<ExecutionState*> &states);
     ExecutionState* getTop(const std::vector<ExecutionState*> &states);
     
+    void normalizeFeature(const std::set<std::pair<double, ExecutionState*>> &st_set);
     std::string getFeatureMapFilename(unsigned id);
 };
 

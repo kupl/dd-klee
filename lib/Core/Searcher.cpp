@@ -486,6 +486,8 @@ ExecutionState &ParameterizedSearcher::selectState() {
   if (updateFeatureMap) {
     f_handler.extractFeatures(states);
     top = f_handler.getTop(states);
+  } else {
+    top = states[theRNG.getInt32()%states.size()];
   }
   return *top;
 }
@@ -517,10 +519,5 @@ void ParameterizedSearcher::update(
     assert(ok && "invalid state removed");
   }
 	
-  if(states.size() == 1) {
-    top = states[0];
-    updateFeatureMap = false;
-  } else {
-    updateFeatureMap = true;
-  }
+  updateFeatureMap = (states.size() * Feature::criterion) >= 1;
 }
