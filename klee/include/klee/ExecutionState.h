@@ -85,12 +85,6 @@ public:
   /// @brief Stack representing the current instruction stream
   stack_ty stack;
 
-  /// @brief whether previous instruction is function call
-  bool stackPopped;
-
-  /// @brief whether previous instruction is return
-  bool stackPushed;
-
   /// @brief Remember from which Basic Block control flow arrived
   /// (i.e. to select the right phi values)
   unsigned incomingBBIndex;

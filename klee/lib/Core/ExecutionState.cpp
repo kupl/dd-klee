@@ -69,9 +69,6 @@ ExecutionState::ExecutionState(KFunction *kf) :
     pc(kf->instructions),
     prevPC(pc),
 
-    stackPopped(false),
-    stackPushed(false),
-
     depth(0),
 
     instsSinceCovNew(0),
@@ -97,8 +94,6 @@ ExecutionState::ExecutionState(const ExecutionState& state):
     pc(state.pc),
     prevPC(state.prevPC),
     stack(state.stack),
-    stackPopped(state.stackPopped),
-    stackPushed(state.stackPushed),
     incomingBBIndex(state.incomingBBIndex),
 
     addressSpace(state.addressSpace),
