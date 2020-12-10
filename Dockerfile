@@ -49,13 +49,13 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt -y --no-install-recomme
 COPY --chown=kupl:kupl . /tmp/${SRC_DIR}
 
 # Build and set kupl to be owner
-RUN /tmp/${SRC_DIR}/scripts/build/build.sh --debug --install-system-deps klee && chown -R kupl:kupl /tmp/${BUILD_DIR}* && pip3 install flask wllvm && \
+RUN /tmp/${SRC_DIR}/klee/scripts/build/build.sh --debug --install-system-deps klee && chown -R kupl:kupl /tmp/${BUILD_DIR}* && pip3 install flask wllvm && \
     rm -rf /var/lib/apt/lists/*
 
 ENV BASE=/tmp
 
 # Add KLEE header files to system standard include folder
-RUN /bin/bash -c 'ln -s ${BASE}/${SRC_DIR}/include/klee /usr/include/'
+RUN /bin/bash -c 'ln -s ${BASE}/${SRC_DIR}/klee/include/klee /usr/include/'
 
 USER kupl
 WORKDIR /home/kupl
