@@ -124,10 +124,11 @@ We provide separate manuals for each approach we've taken on top of KLEE.
 
 Pointers to get you started:
 
-- ParaDySE - Enhancing Dynamic Symbolic Execution by Automatically Learning Search Heuristics
+- [ParaDySE(Parametric Dynamic Symbolic Execution)](paradyse)
 
 # Resources
 
 - [KLEE](http://klee.github.io)
 - [KLEE Tutorials](http://klee.github.io/tutorials/)
 
+# 
