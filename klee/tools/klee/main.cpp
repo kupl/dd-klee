@@ -1142,11 +1142,7 @@ linkWithUclibc(StringRef libDir,
 }
 #endif
 
-int main(int argc, char **argv, char **envp) {
-  FILE *t = fopen("time_result", "a");
-  fprintf(t, "start: %s\n", currentTime().c_str());
-  fclose(t); 
-  
+int main(int argc, char **argv, char **envp) {  
   atexit(llvm_shutdown);  // Call llvm_shutdown() on exit.
 
   KCommandLine::HideOptions(llvm::cl::GeneralCategory);
@@ -1390,6 +1386,9 @@ int main(int argc, char **argv, char **envp) {
     interpreter->setReplayPath(&replayPath);
   }
 
+  FILE *t = fopen("time_result", "a");
+  fprintf(t, "start: %s\n", currentTime().c_str());
+  fclose(t); 
 
   auto startTime = std::time(nullptr);
   { // output clock info and start time
