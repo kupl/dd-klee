@@ -16,8 +16,8 @@ cscope.*
 *.status
 
 # In source build files
-docs/doxygen.cfg
-include/klee/Config/CompileTimeInfo.h
+klee/docs/doxygen.cfg
+klee/include/klee/Config/CompileTimeInfo.h
 *.config
 
 config.h
@@ -36,4 +36,14 @@ autom4te.cache/
 .DS_Store
 
 # examples-related files
-examples/**
+klee/examples/**
+
+### Vagrant ###
+# General
+.vagrant/
+
+# Logfiles
+*.log
+
+### Vagrant Patch ###
+*.box
