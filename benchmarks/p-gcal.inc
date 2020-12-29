@@ -23,20 +23,33 @@ download_gcal() {
 }
 
 build_gcal_gcov() {
-	if [[ -f "${GCAL_GCOV_BUILD_PATH}/.is_installed" ]]; then
-		echo "(gcov) gcal-${GCAL_VERSION} already installed"
-		return
-	fi
 
-	mkdir -p "${GCAL_GCOV_BUILD_PATH}"
-	cd "${GCAL_GCOV_BUILD_PATH}"
-	../configure --disable-nls CFLAGS="-g -fprofile-arcs -ftest-coverage"
-	make && touch "${GCAL_GCOV_BUILD_PATH}/.is_installed"
+	for i in $(seq 1 $core); do	
+		local GCAL_GCOV_BUILD_PATH_
+		local cnt
+		if ! [[ $core -eq "1" ]]; then
+			GCAL_GCOV_BUILD_PATH_=${GCAL_GCOV_BUILD_PATH}${i}
+			cnt=" ${i}"
+		else
+			GCAL_GCOV_BUILD_PATH_=${GCAL_GCOV_BUILD_PATH}
+			cnt=""
+		fi
+
+		if [[ -f "${GCAL_GCOV_BUILD_PATH_}/.is_installed" ]]; then
+			echo "(obj-gcov${cnt}) gcal-${GCAL_VERSION} already installed"
+			continue
+		fi
+		
+		mkdir -p "${GCAL_GCOV_BUILD_PATH_}"
+		cd "${GCAL_GCOV_BUILD_PATH_}"
+		../configure --disable-nls CFLAGS="-g -fprofile-arcs -ftest-coverage"
+		make && touch "${GCAL_GCOV_BUILD_PATH_}/.is_installed"
+	done
 }
 
 build_gcal_llvm() {
 	if [[ -f "${GCAL_LLVM_BUILD_PATH}/.is_installed" ]]; then
-		echo "(llvm) gcal-${GCAL_VERSION} already installed"
+		echo "(obj-llvm) gcal-${GCAL_VERSION} already installed"
 		return
 	fi
 

@@ -23,20 +23,33 @@ download_trueprint() {
 }
 
 build_trueprint_gcov() {
-	if [[ -f "${TRUEPRINT_GCOV_BUILD_PATH}/.is_installed" ]]; then
-		echo "(gcov) trueprint-${TRUEPRINT_VERSION} already installed"
-		return
-	fi
 
-	mkdir -p "${TRUEPRINT_GCOV_BUILD_PATH}"
-	cd "${TRUEPRINT_GCOV_BUILD_PATH}"
-	../configure CFLAGS="-g -fprofile-arcs -ftest-coverage"
-	make && touch "${TRUEPRINT_GCOV_BUILD_PATH}/.is_installed"
+	for i in $(seq 1 $core); do	
+		local TRUEPRINT_GCOV_BUILD_PATH_
+		local cnt
+		if ! [[ $core -eq "1" ]]; then
+			TRUEPRINT_GCOV_BUILD_PATH_=${TRUEPRINT_GCOV_BUILD_PATH}${i}
+			cnt=" ${i}"
+		else
+			TRUEPRINT_GCOV_BUILD_PATH_=${TRUEPRINT_GCOV_BUILD_PATH}
+			cnt=""
+		fi
+
+		if [[ -f "${TRUEPRINT_GCOV_BUILD_PATH_}/.is_installed" ]]; then
+			echo "(obj-gcov${cnt}) trueprcntnt-${TRUEPRINT_VERSION} already cntnstalled"
+			continue
+		fi
+		
+		mkdir -p "${TRUEPRINT_GCOV_BUILD_PATH_}"
+		cd "${TRUEPRINT_GCOV_BUILD_PATH_}"
+		../configure --disable-nls CFLAGS="-g -fprofile-arcs -ftest-coverage"
+		make && touch "${TRUEPRINT_GCOV_BUILD_PATH_}/.is_installed"
+	done
 }
 
 build_trueprint_llvm() {
 	if [[ -f "${TRUEPRINT_LLVM_BUILD_PATH}/.is_installed" ]]; then
-		echo "(llvm) trueprint-${TRUEPRINT_VERSION} already installed"
+		echo "(obj-llvm) trueprint-${TRUEPRINT_VERSION} already installed"
 		return
 	fi
 

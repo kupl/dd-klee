@@ -23,20 +23,33 @@ download_combine() {
 }
 
 build_combine_gcov() {
-	if [[ -f "${COMBINE_GCOV_BUILD_PATH}/.is_installed" ]]; then
-		echo "(gcov) combine-${COMBINE_VERSION} already installed"
-		return
-	fi
 
-	mkdir -p "${COMBINE_GCOV_BUILD_PATH}"
-	cd "${COMBINE_GCOV_BUILD_PATH}"
-	../configure --disable-nls CFLAGS="-g -fprofile-arcs -ftest-coverage"
-	make && touch "${COMBINE_GCOV_BUILD_PATH}/.is_installed"
+	for i in $(seq 1 $core); do	
+		local COMBINE_GCOV_BUILD_PATH_
+		local cnt
+		if ! [[ $core -eq "1" ]]; then
+			COMBINE_GCOV_BUILD_PATH_=${COMBINE_GCOV_BUILD_PATH}${i}
+			cnt=" ${i}"
+		else
+			COMBINE_GCOV_BUILD_PATH_=${COMBINE_GCOV_BUILD_PATH}
+			cnt=""
+		fi
+
+		if [[ -f "${COMBINE_GCOV_BUILD_PATH_}/.is_installed" ]]; then
+			echo "(obj-gcov${cnt}) combine-${COMBINE_VERSION} already installed"
+			continue
+		fi
+		
+		mkdir -p "${COMBINE_GCOV_BUILD_PATH_}"
+		cd "${COMBINE_GCOV_BUILD_PATH_}"
+		../configure --disable-nls CFLAGS="-g -fprofile-arcs -ftest-coverage"
+		make && touch "${COMBINE_GCOV_BUILD_PATH_}/.is_installed"
+	done
 }
 
 build_combine_llvm() {
 	if [[ -f "${COMBINE_LLVM_BUILD_PATH}/.is_installed" ]]; then
-		echo "(llvm) combine-${COMBINE_VERSION} already installed"
+		echo "(obj-llvm) combine-${COMBINE_VERSION} already installed"
 		return
 	fi
 

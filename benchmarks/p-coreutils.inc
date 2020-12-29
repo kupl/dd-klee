@@ -23,20 +23,33 @@ download_coreutils() {
 }
 
 build_coreutils_gcov() {
-	if [[ -f "${COREUTILS_GCOV_BUILD_PATH}/.is_installed" ]]; then
-		echo "(gcov) coreutils-${COREUTILS_VERSION} already installed"
-		return
-	fi
 
-	mkdir -p "${COREUTILS_GCOV_BUILD_PATH}"
-	cd "${COREUTILS_GCOV_BUILD_PATH}"
-	../configure --disable-nls CFLAGS="-g -fprofile-arcs -ftest-coverage"
-	make && touch "${COREUTILS_GCOV_BUILD_PATH}/.is_installed"
+	for i in $(seq 1 $core); do	
+		local COMBIND_GCOV_BUILD_PATH_
+		local cnt
+		if ! [[ $core -eq "1" ]]; then
+			COREUTILS_GCOV_BUILD_PATH_=${COREUTILS_GCOV_BUILD_PATH}${i}
+			cnt=" ${i}"
+		else
+			COREUTILS_GCOV_BUILD_PATH_=${COREUTILS_GCOV_BUILD_PATH}
+			cnt=""
+		fi
+
+		if [[ -f "${COREUTILS_GCOV_BUILD_PATH_}/.is_installed" ]]; then
+			echo "(obj-gcov${cnt}) coreutils-${COREUTILS_VERSION} already installed"
+			continue
+		fi
+		
+		mkdir -p "${COREUTILS_GCOV_BUILD_PATH_}"
+		cd "${COREUTILS_GCOV_BUILD_PATH_}"
+		../configure --disable-nls CFLAGS="-g -fprofile-arcs -ftest-coverage"
+		make && touch "${COREUTILS_GCOV_BUILD_PATH_}/.is_installed"
+	done
 }
 
 build_coreutils_llvm() {
 	if [[ -f "${COREUTILS_LLVM_BUILD_PATH}/.is_installed" ]]; then
-		echo "(llvm) coreutils-${COREUTILS_VERSION} already installed"
+		echo "(obj-llvm) coreutils-${COREUTILS_VERSION} already installed"
 		return
 	fi
 

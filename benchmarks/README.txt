@@ -15,8 +15,15 @@ present, you can do this:
 	BASE=<build_directory> ./build_benchmarks.sh
 
 It'll build two types of binary for each benchmark, one is with
-`gcov` support and the other is with `llvm`. This directory is highly
-inspired by the following resources provided by KLEE:
+`gcov` support and the other is with `llvm`. You can pass `GCOV_CORE`
+variable to build multiple binaries for `gcov` experiment. It is just
+for efficiency when there is need for multiple measurements, and it
+is set to 1 by default. For example:
+
+	BASE=<build_directory> GCOV_CORE=<value> ./build_benchmarks.sh
+
+This directory is highly inspired by the following resources provided
+by KLEE:
 
 	https://klee.github.io/build-script/
 	https://klee.github.io/tutorials/testing-coreutils/
