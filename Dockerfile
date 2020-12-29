@@ -31,8 +31,8 @@ ENV KLEE_RUNTIME_BUILD="Debug"
 
 LABEL maintainer="kupl"
 
-ENV SRC_DIR=klee-kupl_src
-ENV BUILD_DIR=klee-kupl_build
+ENV SRC_DIR=dd-klee_src
+ENV BUILD_DIR=dd-klee_build
 
 # Create ``kupl`` user with password ``kupl``,
 # given password-less sudo access

@@ -1,7 +1,7 @@
-KLEE-kupl (a temporary name)
+Data-Driven KLEE
 =============================
 
-KLEE-kupl is a data-driven symbolic execution engine, implemented on top of [KLEE](klee.github.io). We are taking data-driven approaches to deal with path-explosion problem of dynamic symbolic execution. The details of the techniques can be found in our papers, each of which consists of its own strategy. This repository is being maintained to provide all of such strategies with KLEE.
+DD-KLEE is a data-driven symbolic execution engine, implemented on top of [KLEE](klee.github.io). We are taking data-driven approaches to deal with path-explosion problem of dynamic symbolic execution. The details of the techniques can be found in our papers, each of which consists of its own strategy. This repository is being maintained to provide all of such strategies with KLEE.
 
 - [Installation](#installation)
   - [From Source](#from-source)
@@ -42,10 +42,9 @@ LLVM_VERSION=6 SANITIZER_BUILD= BASE=<LIBCXX_INSTALL_DIR> REQUIRES_RTTI=1 DISABL
 After installing dependencies, you can build our extension of KLEE with `cmake`. Below is example configuration.
 
 ```sh
-git clone https://github.com/kupl/KLEE-kupl.git
-cd ~/KLEE-kupl
-mkdir build
-cd build
+git clone https://github.com/kupl/dd-klee.git
+mkdir -p ~/build
+cd ~/build
 cmake \
 	-DENABLE_SOLVER_STP=ON \
 	-DENABLE_POSIX_RUNTIME=ON \
@@ -59,7 +58,7 @@ cmake \
 	-DENABLE_KLEE_LIBCXX=ON \
 	-DKLEE_LIBCXX_DIR=<LIBCXX_INSTALL_DIR>/libc++-install-60 \
 	-DKLEE_LIBCXX_INCLUDE_DIR=<LIBCXX_INSTALL_DIR>/libc++-install-60/include/c++/v1 \
-	<KLEE-kupl_SRC_DIRECTORY>
+	<dd-klee_SRC_DIRECTORY>
 make
 ```
 
@@ -89,7 +88,7 @@ A command below from the project directory (where `Vagrantfile` is located) crea
 vagrant up
 ```
 
-Next, you should install main `KLEE-kupl`. This proedure is done with `provision`, the subcommand of `vagrant`. Provisioning with `klee_deps` builds some dependencies (e.g. STP) from source. This is done by the script `install_deps.sh`. Provisioning with `klee` builds our extension of KLEE. The script `install_klee.sh` is used and it includes `cmake` usage described in the section [From Source](#From-Source).
+Next, you should install main `dd-klee`. This proedure is done with `provision`, the subcommand of `vagrant`. Provisioning with `klee_deps` builds some dependencies (e.g. STP) from source. This is done by the script `install_deps.sh`. Provisioning with `klee` builds our extension of KLEE. The script `install_klee.sh` is used and it includes `cmake` usage described in the section [From Source](#From-Source).
 
 ```sh
 vagrant provision --with-provision klee_deps,klee
@@ -115,7 +114,7 @@ vagrant up --no-provision
 We provide a `Dockerfile` to build docker image. This uses the build script provided by vanilla KLEE, which is explained in [Building KLEE and its dependencies](http://klee.github.io/build-script/). 
 
 ```sh
-docker build -t kupl/klee .
+docker build -t kupl/dd-klee .
 ```
 
 # Getting Started
@@ -130,5 +129,3 @@ Pointers to get you started:
 
 - [KLEE](http://klee.github.io)
 - [KLEE Tutorials](http://klee.github.io/tutorials/)
-
-# 

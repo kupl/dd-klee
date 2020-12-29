@@ -7,10 +7,10 @@ Vagrant.configure("2") do |config|
   config.disksize.size = "20GB"
   config.vm.box = "ubuntu/bionic64"
   config.vm.hostname = "kupl"
-  config.vm.define "KLEE-kupl"
+  config.vm.define "dd-klee"
   
   config.vm.provider "virtualbox" do |vb|
-    vb.name = "KLEE-kupl"
+    vb.name = "dd-klee"
     vb.memory = "2048"
     vb.cpus = "2"
     vb.customize ["modifyvm", :id, "--ioapic", "on"]
