@@ -1,0 +1,8 @@
+{
+"pgm_name": "ls",
+"pgm_dir": "../benchmarks/coreutils-8.32/obj-llvm/",
+"exec_dir": "/src",
+"gcov_path": "../benchmarks/coreutils-8.32/obj-gcov",
+"gcov_file": "../*/*.gcov",
+"gcda_file": "../*/*.gcda"
+}
