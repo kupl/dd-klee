@@ -58,7 +58,7 @@ cmake \
 	-DENABLE_KLEE_LIBCXX=ON \
 	-DKLEE_LIBCXX_DIR=<LIBCXX_INSTALL_DIR>/libc++-install-60 \
 	-DKLEE_LIBCXX_INCLUDE_DIR=<LIBCXX_INSTALL_DIR>/libc++-install-60/include/c++/v1 \
-	<dd-klee_SRC_DIRECTORY>
+	<dd-klee_SRC_DIRECTORY>/klee
 make
 ```
 
