@@ -16,7 +16,7 @@ main() {
 	fi
 	
 
-	CWD=$PWD
+	DIR="$(cd "$(dirname "$0")" && pwd)"
 
 	mkdir -p ${BASE}
 	 	
@@ -28,7 +28,7 @@ main() {
 	)
 
 	for benchmark in "${benchmarks[@]}"; do
-		cd "${CWD}"
+		cd "${DIR}"
 		source "p-${benchmark}.inc"
 		setup_build_variables_${benchmark}
 		download_${benchmark}
