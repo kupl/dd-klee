@@ -17,10 +17,13 @@ cd $KLEE_BUILD_DIR
 
 cmake \
 	-DENABLE_SOLVER_STP=ON \
+	-DENABLE_SOLVER_Z3=ON \
 	-DENABLE_POSIX_RUNTIME=ON \
 	-DENABLE_KLEE_UCLIBC=ON \
 	-DKLEE_UCLIBC_PATH=$KLEE_DEPS_DIR/klee-uclibc \
 	-DSTP_DIR=$KLEE_DEPS_DIR/stp/build \
+	-DZ3_INCLUDE_DIRS=/home/vagrant/.local/include \
+	-DZ3_LIBRARIES=/home/vagrant/.local/lib/libz3.so \
 	-DENABLE_UNIT_TESTS=OFF \
 	-DENABLE_SYSTEM_TESTS=OFF \
 	-DLLVM_CONFIG_BINARY=$LLVM_HOME/bin/llvm-config \

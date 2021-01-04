@@ -23,9 +23,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y \
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
 	bison flex libboost-all-dev python perl zlib1g-dev minisat
 
-# z3 dependencies
-# TODO
-
 # klee experiment dependencies
 pip3 install wllvm
 
+cat /vagrant/bash_profile >> /home/vagrant/.bashrc

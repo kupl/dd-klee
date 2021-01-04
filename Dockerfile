@@ -3,12 +3,14 @@ FROM klee/gtest:1.7.0_ubuntu_bionic-20200112 as gtest_base
 FROM klee/uclibc:klee_uclibc_v1.2_60_ubuntu_bionic-20200112 as uclibc_base
 FROM klee/tcmalloc:2.7_ubuntu_bionic-20200112 as tcmalloc_base
 FROM klee/stp:2.3.3_ubuntu_bionic-20200112 as stp_base
+FROM klee/z3:4.8.4_ubuntu_bionic-20200807 as z3_base
 FROM klee/libcxx:60_ubuntu_bionic-20200112 as libcxx_base
 FROM llvm_base as intermediate
 COPY --from=gtest_base /tmp /tmp/
 COPY --from=uclibc_base /tmp /tmp/
 COPY --from=tcmalloc_base /tmp /tmp/
 COPY --from=stp_base /tmp /tmp/
+COPY --from=z3_base /tmp /tmp/
 COPY --from=libcxx_base /tmp /tmp/
 ENV BASE=/tmp
 ENV COVERAGE=0
@@ -22,8 +24,9 @@ ENV GTEST_VERSION=1.7.0
 ENV UCLIBC_VERSION=klee_uclibc_v1.2
 ENV USE_TCMALLOC=1
 ENV TCMALLOC_VERSION=2.7
-ENV SOLVERS=STP
+ENV SOLVERS=STP:Z3
 ENV STP_VERSION=2.3.3
+ENV Z3_VERSION=4.8.4
 ENV MINISAT_VERSION=master
 ENV USE_LIBCXX=1
 ENV SANITIZER_BUILD=
@@ -67,4 +70,4 @@ RUN /bin/bash -c 'ln -s ${BASE}/${SRC_DIR} /home/kupl/ && ln -s ${BASE}/${BUILD_
 ENV PATH="$PATH:/tmp/llvm-60-install_O_D_A/bin:/home/kupl/${BUILD_DIR}/bin"
 
 # Add KLEE library directory to LD_LIBRARY_PATH
-ENV LD_LIBRARY_PATH /home/kupl/${BUILD_DIR}/lib
+RUN /bin/bash -c 'echo "export LLVM_COMPILER=clang" >> /home/kupl/.bashrc'
