@@ -18,16 +18,14 @@ configs = {
 	'top_dir': os.path.abspath('../experiments/')
 }
 
-check_times="5"
-
 def load_pgm_config(config_file):
     with open(config_file, 'r') as f:
         parsed = json.load(f)
     
     return parsed
 	
-def check_10(pconfig, pgm, n_parallel, trial, total_time, init_time, ith_trial):
-    top_dir = "/".join([configs['top_dir'], ith_trial+configs['date']+"__find"+trial, pgm])
+def run_check(pconfig, pgm, n_parallel, trial, total_time, init_time, a_budget, check_times, ith_trial):
+    top_dir = "/".join([configs['top_dir'], ith_trial+"__find"+trial, pgm])
 	
     log_dir = top_dir + "/" + "__".join([pgm,"find"+trial, "logs"])
     os.chdir(log_dir)
@@ -50,8 +48,13 @@ def check_10(pconfig, pgm, n_parallel, trial, total_time, init_time, ith_trial):
     scr_dir = configs['script_path'] 
     os.chdir(scr_dir)
     topw_list = ", ".join(top_list)
-    check_cmd = " ".join(["python", "subscripts/check_w.py", args.pgm_config, n_parallel, check_times, "-l", '"'+ topw_list +'"', trial, total_time, init_time, ith_trial])
-    os.system(check_cmd)
+    check_cmd = ["python", "subscripts/check_w.py", args.pgm_config, n_parallel, check_times, "-l", topw_list, trial, total_time, init_time, a_budget, ith_trial]
+            
+            
+    x = subprocess.Popen(check_cmd)
+    x.communicate()
+    if int(x.returncode)==100:
+        sys.exit(100)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -61,6 +64,8 @@ if __name__ == "__main__":
     parser.add_argument("trial")
     parser.add_argument("total_time")
     parser.add_argument("init_time")
+    parser.add_argument("a_budget")
+    parser.add_argument("check_times")
     parser.add_argument("ith_trial")
     
     args = parser.parse_args()
@@ -70,6 +75,8 @@ if __name__ == "__main__":
     trial = args.trial
     total_time = args.total_time
     init_time = args.init_time
+    a_budget = args.a_budget
+    check_times = args.check_times
     ith_trial= args.ith_trial
     
-    check_10(pconfig, pgm, n_parallel, trial, total_time, "\""+init_time+"\"", ith_trial)
+    run_check(pconfig, pgm, n_parallel, trial, total_time, init_time, a_budget, check_times, ith_trial)

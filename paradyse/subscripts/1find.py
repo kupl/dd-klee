@@ -1,4 +1,4 @@
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
 import signal
 import subprocess
@@ -15,8 +15,6 @@ import subprocess
 from subprocess import Popen, PIPE
 import time
 from threading import Timer
-
-max_time=1000
 
 start_time = datetime.datetime.now()
 date = start_time.strftime('%m')
@@ -40,13 +38,14 @@ def Timeout_Checker(total_time, init_time):
     if total_time < elapsed_time:
         os.chdir(configs['script_path'])
         print ("#############################################")
-        print ("################Time Out!!!!!################")
+        print ("###############Time Out!!!!!#################")
         print ("#############################################")
-        sys.exit()
+        return 100
+    else:
+        return 0
 
 
-
-def gen_run_cmd(pgm, idx):
+def gen_run_cmd(pgm, idx, a_budget):
     argv = "--sym-args 0 1 10 --sym-args 0 2 2 --sym-files 1 8 --sym-stdin 8 --sym-stdout"
     log = "logs/" + "__".join([pgm+"find"+args.trial, "ours", str(idx)]) + ".log"
     weight = configs['script_path'] +"/"+ args.trial + "_weights/" + str(idx) + ".weight"
@@ -58,7 +57,7 @@ def gen_run_cmd(pgm, idx):
                                 "--posix-runtime", "-env-file="+configs['b_dir']+"/../test.env",
                                 "--max-sym-array-size=4096", "--max-memory-inhibit=false",
                                 "--switch-type=internal", "--use-batching-search", "--batch-instructions=10000", 
-                                "--watchdog -max-time="+str(max_time), "-search=param",
+                                "--watchdog -max-time="+a_budget, "-search=param",
                                 "-weight="+weight, pgm+".bc", argv]) 
  
     return (run_cmd, log)
@@ -84,7 +83,7 @@ def Kill_Process(process, testcase):
     print("timeover!")
 
 
-def running_function(pconfig, pgm, top_dir, log_dir, group_id, idx_list, trial, total_time, init_time, ith_trial):
+def running_function(pconfig, pgm, top_dir, log_dir, group_id, idx_list, trial, total_time, init_time, a_budget, ith_trial, queue):
     group_dir = top_dir + "/" + str(group_id)
     os.system(" ".join(["cp -r", pconfig['pgm_dir'], group_dir]))
     tc_location=group_dir+"/"+pconfig['exec_dir']
@@ -94,11 +93,13 @@ def running_function(pconfig, pgm, top_dir, log_dir, group_id, idx_list, trial, 
     cnt=0
     find_total_log = pgm+"__tfind"+trial+"__"+str(group_id)+".log"
     lf = open(find_total_log, "a")
-    
+    rc=0
     for idx in idx_list:
         os.chdir(tc_location)
-        (run_cmd, log) = gen_run_cmd(pgm, idx)
-        Timeout_Checker(total_time, init_time)
+        (run_cmd, log) = gen_run_cmd(pgm, idx, a_budget)
+        rc=Timeout_Checker(total_time, init_time)
+        if rc==100:
+            break
         with open(os.devnull, 'wb') as devnull:
             os.system(run_cmd)
         
@@ -148,14 +149,17 @@ def running_function(pconfig, pgm, top_dir, log_dir, group_id, idx_list, trial, 
     os.system(cp_cmd)
 
     os.chdir(configs['script_path'])
+    queue.put(rc) 
 
-def run_all(pconfig, pgm, n_iter, n_groups, trial, total_time, init_time, ith_trial):
-    top_dir = "/".join([configs['top_dir'], ith_trial+configs['date']+"__find"+trial, pgm])
+def run_find(pconfig, pgm, n_iter, n_groups, trial, total_time, init_time, a_budget, ith_trial):
+    top_dir = "/".join([configs['top_dir'], ith_trial+"__find"+trial, pgm])
     log_dir = top_dir + "/" + "__".join([pgm,"find"+trial, "logs"])
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)    
     procs = []
-    #Total:50 / count:2 / mod:10
+    rets = []
+    q = Queue()
+    #Total parameters:50 / count:2 / mod:10
     count = int(n_iter / n_groups)
     mod = int(n_iter % n_groups)
     tasks=[1] 
@@ -174,12 +178,16 @@ def run_all(pconfig, pgm, n_iter, n_groups, trial, total_time, init_time, ith_tr
         max_val=tasks[i]+1
         a_list=[val for val in range(min_val,max_val)]
         idx_list_list.append(a_list)
-    print idx_list_list
     for gid in range(1, n_groups+1):
         idx_list= idx_list_list[gid-1]
-        procs.append(Process(target=running_function, args=(pconfig, pgm, top_dir, log_dir, gid, idx_list, trial, total_time, init_time, ith_trial)))
+        procs.append(Process(target=running_function, args=(pconfig, pgm, top_dir, log_dir, gid, idx_list, trial, total_time, init_time, a_budget, ith_trial, q)))
     for p in procs:
         p.start()
+    for p in procs:
+        ret = q.get()
+        rets.append(ret)
+    if 100 in rets:
+        sys.exit(100)
 	
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -189,6 +197,7 @@ if __name__ == "__main__":
     parser.add_argument("trial")
     parser.add_argument("total_time")
     parser.add_argument("init_time")
+    parser.add_argument("a_budget")
     parser.add_argument("ith_trial")
     
     args = parser.parse_args()
@@ -199,5 +208,6 @@ if __name__ == "__main__":
     trial = args.trial
     total_time = int(args.total_time)
     init_time = args.init_time
+    a_budget = args.a_budget
     ith_trial= args.ith_trial
-    run_all(pconfig, pgm, n_iter, n_parallel, trial, total_time, init_time, ith_trial)
+    run_find(pconfig, pgm, n_iter, n_parallel, trial, total_time, init_time, a_budget, ith_trial)
