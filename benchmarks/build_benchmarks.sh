@@ -14,21 +14,27 @@ main() {
 	else
 		core=$GCOV_CORE
 	fi
-	
-
-	DIR="$(cd "$(dirname "$0")" && pwd)"
 
 	mkdir -p ${BASE}
-	 	
-	benchmarks=(
+	BASE=$(cd "$(dirname "${BASE}/.")"; echo "${PWD}")
+	SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+	whole_benchmarks=(
 		coreutils
 		combine
 		trueprint
 		gcal
 	)
 
-	for benchmark in "${benchmarks[@]}"; do
-		cd "${DIR}"
+	if [[ -z "${BENCHMARKS}" ]]; then
+		benchmarks=${whole_benchmarks[@]}
+	else
+		benchmarks=$(echo $BENCHMARKS | sed "s/,/ /g")
+	fi
+	
+	for benchmark in $benchmarks; do
+		cd "${SCRIPT_DIR}"
+		echo $benchmark
 		source "p-${benchmark}.inc"
 		setup_build_variables_${benchmark}
 		download_${benchmark}

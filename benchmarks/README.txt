@@ -14,6 +14,11 @@ present, you can do this:
 
 	BASE=<build_directory> ./build_benchmarks.sh
 
+You can also specify the benchmarks with `BENCHMARKS` variable:
+
+	BASE=<build_directory> BENCHMARKS=gcal,coreutils \
+		./build_benchmarks.sh
+
 It'll build two types of binary for each benchmark, one is with
 `gcov` support and the other is with `llvm`. You can pass `GCOV_CORE`
 variable to build multiple binaries for `gcov` experiment. It is just
