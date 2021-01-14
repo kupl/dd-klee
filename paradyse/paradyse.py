@@ -1,4 +1,5 @@
 from multiprocessing import Process
+from subprocess import Popen, PIPE
 
 import signal
 import subprocess
@@ -13,10 +14,13 @@ import re
 import time
 from threading import Timer
 
-start_time = datetime.datetime.now()
-init_time = datetime.datetime.now()
+# hyper-parameters
+a_budget="1000" #  (i.e., N = 1000s in Algorithm 2) 
+check_times="5" # (i.g., T = 5 at line 16 in Algorithm 3)
 
+start_time = datetime.datetime.now()
 date = start_time.strftime('%m')
+ith_trial="1" # ith-trial 
 
 configs = {
     'script_path': os.path.abspath(os.getcwd()),
@@ -24,23 +28,26 @@ configs = {
     'top_dir': os.path.abspath('../experiments/')
 }
 
+
 def load_pgm_config(config_file):
     with open(config_file, 'r') as f:
         parsed = json.load(f)
     
     return parsed
+
 	
-def clean_dir(pgm, iters, n_iter, n_parallel, ith_trial):
-    core_num = n_parallel
-    count = n_iter/n_parallel
+def clean_dir(pconfig, pgm, iters, n_parameter, n_parallel, ith_trial):
+    core_num = int(n_parallel)
+    count = int(n_parameter)/core_num
+    exec_dir=pconfig['exec_dir']   
     
     #find_log 
     for i in range(1,int(iters)+1):
-        top_dir = "/".join([configs['top_dir'], ith_trial+configs['date']+"__find"+str(i), pgm])
+        top_dir = "/".join([configs['top_dir'], ith_trial+"__find"+str(i), pgm])
         dir_name = top_dir+"/"+pgm+"__find"+str(i)+"__logs/"
         os.chdir(top_dir)
         for j in range(1, core_num+1):
-            os.chdir(str(j)+"/src/")
+            os.chdir(str(j)+exec_dir+"/")
             rm_cmd = " ".join(["rm", "klee-out-*/final.bc", "klee-out-*/messages.txt", "klee-out-*/run.*", "klee-out-*/assembly.ll", "klee-out-*/warnings.txt"])
             os.system(rm_cmd)
             for k in range(0,count):
@@ -57,7 +64,7 @@ def clean_dir(pgm, iters, n_iter, n_parallel, ith_trial):
     
     #check_log 
     for i in range(1,int(iters)+1):
-        top_dir = "/".join([configs['top_dir'], ith_trial+configs['date']+"__check"+str(i), pgm])
+        top_dir = "/".join([configs['top_dir'], ith_trial+"__check"+str(i), pgm])
         dir_name = top_dir+"/"+pgm+"__check"+str(i)+"__logs/"
         os.chdir(top_dir) 
         os.system("ls >> "+pgm+"_result")
@@ -68,7 +75,7 @@ def clean_dir(pgm, iters, n_iter, n_parallel, ith_trial):
                 if l.find(pgm) < 0:
                     dir_list.add(l.split('\n')[0])
         for dir_num in dir_list:
-            os.chdir(dir_num+"/src/")
+            os.chdir(dir_num+exec_dir+"/")
             rm_cmd = " ".join(["rm", "klee-out-*/final.bc", "klee-out-*/messages.txt", "klee-out-*/run.*", "klee-out-*/assembly.ll", "klee-out-*/warnings.txt"])
             os.system(rm_cmd)
             for k in range(0,10):
@@ -83,24 +90,22 @@ def clean_dir(pgm, iters, n_iter, n_parallel, ith_trial):
         cp_cmd = " ".join(["cp -r", dir_name, configs['top_dir']+"/"+ith_trial+pgm+"__all__logs"])
         os.system(cp_cmd)
 	
-def run_all(pconfig, pgm, n_iter, n_groups, total_time, ith_trial):
+def run_paradyse(pconfig, pgm, n_parameter, n_groups, total_time, ith_trial):
     final_dir = "/".join([configs['top_dir'], ith_trial+pgm+"__all__logs"])
     if not os.path.exists(final_dir):
         os.makedirs(final_dir)
-    all_dir = "/".join([final_dir, "all_logs"])
-    if not os.path.exists(all_dir):
-        os.makedirs(all_dir)
     w_dir = "/".join([final_dir, "w_"+ pgm])
     if not os.path.exists(w_dir):
         os.makedirs(w_dir)
 		
     scr_dir = configs['script_path'] 
     os.chdir(scr_dir)
-    for i in range(1, 10):
+    for i in range(1, 20):
         rm_cmd = " ".join(["rm -rf", str(i)+"_weights"])
         os.system(rm_cmd)
- 
-    genw_cmd = " ".join(["python", "subscripts/gen_weights.py", args.n_iter])
+    
+    # initially sample n parameters.
+    genw_cmd = " ".join(["python", "subscripts/gen_weights.py", n_parameter])
     os.system(genw_cmd)
     cpw_final_cmd = " ".join(["cp -r", "1_weights", w_dir])
     os.system(cpw_final_cmd)
@@ -110,15 +115,24 @@ def run_all(pconfig, pgm, n_iter, n_groups, total_time, ith_trial):
     last_iter = 1	
     for i in range(1, 20):
         #find - check - refine	
-        find_cmd = " ".join(["python", "subscripts/1find.py", 
-                             args.pgm_config, args.n_iter, args.n_parallel, str(i), total_time, "\""+str(init_time)+"\"", ith_trial])	
-        re_val=os.system(find_cmd)
-        check_cmd = " ".join(["python", "subscripts/2check.py", 
-                             args.pgm_config, args.n_parallel, str(i), total_time, "\""+str(init_time)+"\"", ith_trial])
-        re_val=os.system(check_cmd)
+        find_cmd = ["python", "subscripts/1find.py", 
+                             args.pgm_config, n_parameter, args.n_parallel, str(i), total_time, str(start_time), a_budget, ith_trial]	
+        print find_cmd 
+        x = subprocess.Popen(find_cmd)
+        x.communicate()
+        if int(x.returncode)==100:
+            break
+        
+        check_cmd = ["python", "subscripts/2check.py", 
+                             args.pgm_config, args.n_parallel, str(i), total_time, str(start_time), a_budget, check_times, ith_trial]
          
-        refine_cmd = " ".join(["python", "subscripts/3refine.py", pgm, args.n_iter, str(i), ith_trial])
-        print refine_cmd
+        x = subprocess.Popen(check_cmd)
+        x.communicate()
+        print (x.returncode)
+        if int(x.returncode)==100:
+            break
+
+        refine_cmd = " ".join(["python", "subscripts/3refine.py", pgm, n_parameter, str(i), check_times, ith_trial])
         os.system(refine_cmd)
 	
         #check saturation
@@ -135,7 +149,7 @@ def run_all(pconfig, pgm, n_iter, n_groups, total_time, ith_trial):
         last_iter = i
         
     #mv result
-    clean_dir(pgm, last_iter, n_iter, n_groups, ith_trial) 
+    clean_dir(pconfig, pgm, last_iter, n_parameter, n_groups, ith_trial) 
     os.chdir(scr_dir)
     #the best w's average coverage	
     with open("top2w_"+ pgm+"_log", 'r') as f:
@@ -150,7 +164,7 @@ def run_all(pconfig, pgm, n_iter, n_groups, total_time, ith_trial):
     os.system(mv_topw)
 	
     #cp information  
-    for i in range(1, 10):
+    for i in range(1, 20):
         rm_cmd = " ".join(["rm -rf", str(i)+"_weights"])
         os.system(rm_cmd)
         
@@ -161,7 +175,7 @@ def run_all(pconfig, pgm, n_iter, n_groups, total_time, ith_trial):
     os.system(cp_topw)
    
     finished_time = datetime.datetime.now() 
-    print start_time, finished_time
+    print (start_time, finished_time)
     os.chdir(final_dir)
     with open(pgm+"_time_final_result", 'w') as ff:
         ff.write("start_time: "+str(start_time)+"\n")
@@ -175,17 +189,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     parser.add_argument("pgm_config")
-    parser.add_argument("n_iter")
+    parser.add_argument("n_parameter")
     parser.add_argument("n_parallel")
     parser.add_argument("total_budget")
-    parser.add_argument("ith_trial")
     
     args = parser.parse_args()
     pconfig = load_pgm_config(args.pgm_config)
     pgm = pconfig['pgm_name']
-    n_iter = int(args.n_iter)
-    n_parallel = int(args.n_parallel)
+    n_parameter = args.n_parameter
+    n_parallel = args.n_parallel
     total_budget= args.total_budget
-    ith_trial= args.ith_trial
     
-    run_all(pconfig, pgm, n_iter, n_parallel, total_budget, ith_trial)
+    run_paradyse(pconfig, pgm, n_parameter, n_parallel, total_budget, ith_trial)

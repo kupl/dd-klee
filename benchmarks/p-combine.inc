@@ -3,20 +3,20 @@ setup_build_variables_combine() {
 	if [[ -z "${COMBINE_VERSION}" ]]; then
 		COMBINE_VERSION="0.4.0"
 	fi
-	COMBINE_INSTALL_PATH="${BASE}/GNU/combine-${COMBINE_VERSION}"
+	COMBINE_INSTALL_PATH="${BASE}/combine-${COMBINE_VERSION}"
 	COMBINE_GCOV_BUILD_PATH="${COMBINE_INSTALL_PATH}/obj-gcov"
 	COMBINE_LLVM_BUILD_PATH="${COMBINE_INSTALL_PATH}/obj-llvm"
 }
 
 download_combine() {
-	if [[ ! -d "${BASE}/GNU" ]]; then
-		mkdir -p "${BASE}/GNU"
+	if [[ ! -d "${BASE}" ]]; then
+		mkdir -p "${BASE}"
 	elif [[ -d "${COMBINE_INSTALL_PATH}" ]]; then
 		echo "combine-${COMBINE_VERSION} exists"
 		return
 	fi
 			
-	cd "${BASE}/GNU"
+	cd "${BASE}"
 	wget "https://mirror.yongbok.net/gnu/combine/combine-${COMBINE_VERSION}.tar.gz"
 	tar zxvf "combine-${COMBINE_VERSION}.tar.gz"
 	rm "combine-${COMBINE_VERSION}.tar.gz"

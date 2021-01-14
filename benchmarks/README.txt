@@ -4,8 +4,8 @@ evaluate our techniques.
 We are maintaining this directory to easily add/remove the benchmarks
 according to our experiment. It's organized as follows:
 
-	p-BENCHMARK.inc			- build description 
-	build_benchmarks.sh	- main build scripts
+	p-BENCHMARK.inc				- build description 
+	build_benchmarks.sh		- main build scripts
 
 The prefix of `p-BENCHMARK.inc` means platform-specific. We currently
 assume benchmarks to be built on Ubuntu, but leave the possibility to

@@ -1,8 +1,0 @@
-{
-"pgm_name": "gawk",
-"pgm_dir": "../benchmarks/gawk-3.0.3/obj-llvm/",
-"exec_dir": "/",
-"gcov_path": "../benchmarks/gawk-3.0.3/obj-gcov",
-"gcov_file": "./*.gcov",
-"gcda_file": "./*.gcda"
-}

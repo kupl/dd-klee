@@ -1,0 +1,8 @@
+{
+"pgm_name": "gcal",
+"pgm_dir": "../benchmarks/gcal-4.1/obj-llvm/",
+"exec_dir": "/src",
+"gcov_path": "../benchmarks/gcal-4.1/obj-gcov",
+"gcov_file": "../*/*.gcov",
+"gcda_file": "../*/*.gcda"
+}

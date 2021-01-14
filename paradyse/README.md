@@ -2,6 +2,65 @@ This directory contains the implementation of the algorithm to automatically lea
 
 - Enhancing Dynamic Symbolic Execution by Automatically Learning Search Heuristics
 
+## How to Automatically Generate a Search Heuristic?
+
+The script for automatically generating a search heuristic is run on a benchmark built with gcov and llvm. Here, we present the steps to be taken to generate a search heuristic for **gcal-4.1** 
+
+First, each benchmark should be built with gcov and llvm, respectively. For detailed information about the build script we provide, refer [benchmarks/README.txt](../benchmarks/README.txt).
+
+```sh
+# note that installation directory cannot be customized
+# since it's hard-coded in paradyse script
+cd ~/dd-klee/benchmarks
+BASE=./ GCOV_CORE=20 BENCHMARKS=gcal ./build_benchmarks.sh
+```
+
+Next, you can run paradyse with following command.
+
+```sh
+cd ~/dd-klee/paradyse/
+python paradyse.py pgm_config/gcal.json 300 20 72000
+```
+
+Each argument of the last command means:
+
+-   **pgm_config/gcal.json** : a json file to describe the benchmark.
+-   **300** : the number of parameters to evaluate in **Find Phase**
+-   **20** : the number of cpu cores to use in parallel
+-   **72000**: the total testing budget  (second) 
+
+If the script successfully ends, you can see the following command:
+
+```sh
+#############################################
+Successfully Generate a Search Heuristic!!!!!
+#############################################
+```
+
+Then, you can find the generated search heuristic (i.e. parameter values) as follows:
+
+```sh
+cd ~/dd-klee/experiments/1gcal__all__logs
+vim best.w # (Automatically Generated Search Heuristic)
+```
+
+You can run gcal-4.1 with the generated heuristic as follows: 
+
+```sh
+cd ~/dd-klee/experiments/1gcal__all__logs
+cp best.w ~/dd-klee/benchmarks/gcal-4.1/obj-llvm/src/best.w 
+cd ~/dd-klee/paradyse 
+python run_search_heuristic.py pgm_config/gcal.json best.w 10 10 1000
+```
+
+Each argument of the last command means:
+
+-   **pgm_config/gcal.json** : a json file to describe the benchmark.
+-   **best.w** : a search heuristic (e.g., dfs, random-path, nurs:covnew, ... )
+-   **10**: the number of total trials 
+-   ## **10** : the number of cpu cores to use in parallel
+-   **1000**: the total testing budget (second) 
+
 ## ParameterizedSearcher
 
 We implemented `ParameterizedSearcher` which inherits the class `Seacher` in KLEE. The `ParameterizedSearcher` uses various features and pretrained weights to decide which state to execute. KLEE takes command line arguments to set search strategy. You can use our strategy as follow.

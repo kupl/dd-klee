@@ -3,20 +3,20 @@ setup_build_variables_gcal() {
 	if [[ -z "${GCAL_VERSION}" ]]; then
 		GCAL_VERSION="4.1"
 	fi
-	GCAL_INSTALL_PATH="${BASE}/GNU/gcal-${GCAL_VERSION}"
+	GCAL_INSTALL_PATH="${BASE}/gcal-${GCAL_VERSION}"
 	GCAL_GCOV_BUILD_PATH="${GCAL_INSTALL_PATH}/obj-gcov"
 	GCAL_LLVM_BUILD_PATH="${GCAL_INSTALL_PATH}/obj-llvm"
 }
 
 download_gcal() {
-	if [[ ! -d "${BASE}/GNU" ]]; then
-		mkdir -p "${BASE}/GNU"
+	if [[ ! -d "${BASE}" ]]; then
+		mkdir -p "${BASE}"
 	elif [[ -d "${GCAL_INSTALL_PATH}" ]]; then
 		echo "gcal-${GCAL_VERSION} exists"
 		return
 	fi
 			
-	cd "${BASE}/GNU"
+	cd "${BASE}"
 	wget "https://mirror.yongbok.net/gnu/gcal/gcal-${GCAL_VERSION}.tar.gz"
 	tar zxvf "gcal-${GCAL_VERSION}.tar.gz"
 	rm "gcal-${GCAL_VERSION}.tar.gz"

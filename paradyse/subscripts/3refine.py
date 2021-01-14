@@ -18,8 +18,8 @@ configs = {
 	'top_dir': os.path.abspath('../experiments/')
 }
 
-def refine_2(pgm, n_iter, trial, ith_trial):
-    top_dir = "/".join([configs['top_dir'], ith_trial+configs['date']+"__check"+str(trial), pgm])
+def run_refine(pgm, n_iter, trial, check_times, ith_trial):
+    top_dir = "/".join([configs['top_dir'], ith_trial+"__check"+str(trial), pgm])
     log_dir = top_dir + "/" + "__".join([pgm,"check"+str(trial), "logs"])
     os.chdir(log_dir)
     cat_cmd = " ".join(["cat", pgm+"*__check*", "> check_result"+str(trial)])
@@ -35,17 +35,15 @@ def refine_2(pgm, n_iter, trial, ith_trial):
                 w_coverage[weight].append(float(cov)) 
             else:
                 w_coverage[weight] = [float(cov),]
-    print w_coverage
     avr_list =[];	
     for key in w_coverage.keys():
-        if w_coverage[key]==0 or len(w_coverage[key])<4:
+        if w_coverage[key]==0 or len(w_coverage[key])<(check_times-1):
             return None
         else:				
             tup = (key, (sum(w_coverage[key], 0.0)/len(w_coverage[key])));			
             avr_list.append(tup) 
 	
     sort_list = sorted(avr_list, key=lambda tup: tup[1]) #coverage sort
-    print sort_list
     scr_dir= configs['script_path'] 
     os.chdir(scr_dir)
     with open(pgm+"_topcheck_log", 'a') as covf:
@@ -58,13 +56,7 @@ def refine_2(pgm, n_iter, trial, ith_trial):
         topwf.write("top 1: "+top1_w + " Top 2: " + top2_w +"\n" )
 		
     print ("Top 1: ", top1_w, "Top 2: ", top2_w)  
-    #remove check folder
-    for sort_element in sort_list:
-        w_name = sort_element[0]
-        #rm_cmd = " ".join(["rm -rf", top_dir+"/"+w_name])
-        #os.system(rm_cmd)
 
-    print top1_w, top2_w
     refine_cmd = " ".join(["python", "subscripts/refine_w.py", args.trial+"_weights/"+top1_w, args.trial+"_weights/"+top2_w, args.n_iter, args.trial])
     os.system(refine_cmd)
 
@@ -75,12 +67,14 @@ if __name__ == "__main__":
     parser.add_argument("pgm")
     parser.add_argument("n_iter")
     parser.add_argument("trial")
+    parser.add_argument("check_times")
     parser.add_argument("ith_trial")
     
     args = parser.parse_args()
     pgm = args.pgm
     n_iter = int(args.n_iter)
     trial = int(args.trial)
+    check_times = int(args.check_times)
     ith_trial= args.ith_trial
     
-    refine_2(pgm, n_iter, trial, ith_trial)
+    run_refine(pgm, n_iter, trial, check_times, ith_trial)
