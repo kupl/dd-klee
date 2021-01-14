@@ -3,20 +3,20 @@ setup_build_variables_trueprint() {
 	if [[ -z "${TRUEPRINT_VERSION}" ]]; then
 		TRUEPRINT_VERSION="5.4"
 	fi
-	TRUEPRINT_INSTALL_PATH="${BASE}/GNU/trueprint-${TRUEPRINT_VERSION}"
+	TRUEPRINT_INSTALL_PATH="${BASE}/trueprint-${TRUEPRINT_VERSION}"
 	TRUEPRINT_GCOV_BUILD_PATH="${TRUEPRINT_INSTALL_PATH}/obj-gcov"
 	TRUEPRINT_LLVM_BUILD_PATH="${TRUEPRINT_INSTALL_PATH}/obj-llvm"
 }
 
 download_trueprint() {
-	if [[ ! -d "${BASE}/GNU" ]]; then
-		mkdir -p "${BASE}/GNU"
+	if [[ ! -d "${BASE}" ]]; then
+		mkdir -p "${BASE}"
 	elif [[ -d "${TRUEPRINT_INSTALL_PATH}" ]]; then
 		echo "trueprint-${TRUEPRINT_VERSION} exists"
 		return
 	fi
 			
-	cd "${BASE}/GNU"
+	cd "${BASE}"
 	wget "https://mirror.yongbok.net/gnu/trueprint/trueprint-${TRUEPRINT_VERSION}.tar.gz"
 	tar zxvf "trueprint-${TRUEPRINT_VERSION}.tar.gz"
 	rm "trueprint-${TRUEPRINT_VERSION}.tar.gz"
